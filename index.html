@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><title>P1zTube</title>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{--panel:#f4f9ffee;--card:#fff;--ink:#3a5a8c;--mute:#8aa3c8;--acc:#6fb3ff;--acc2:#bfe0ff;--line:#d3e6fb;--track:#a9cdf2;--fa:#2f8cff;--fb:#8cc8ff;--bad:#ff8fa3;--sh:0 6px 18px #6fb3ff40}
+body[data-theme=night]{--panel:#23284aee;--card:#2e3563;--ink:#e8eeff;--mute:#9ba8dc;--acc:#8fb4ff;--acc2:#4b5aa8;--line:#3d4580;--track:#555fa6;--fa:#7aa2ff;--fb:#b4ccff;--sh:0 6px 18px #0006}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font:13px "Mali","Itim","Noto Sans Thai","Leelawadee UI",sans-serif;color:var(--ink)}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.s{width:16px;height:16px}
+#stage{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center}
+#av{transform-origin:bottom center;display:flex;justify-content:center}
+#im{transform-origin:bottom center;display:block}
+#fx{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
+#fx span,#fx img{position:absolute;font-weight:900;animation-fill-mode:both;animation-timing-function:ease-out}
+.bub{position:absolute;border-radius:50%;--bc:#7cc4ff;--bo:1;background:radial-gradient(circle at 32% 28%,#fffc 0 12%,color-mix(in srgb,var(--bc) 25%,transparent) 35%,color-mix(in srgb,var(--bc) 30%,transparent) 70%,color-mix(in srgb,var(--bc) 45%,transparent));border:2px solid #ffffffb0;box-shadow:inset -4px -6px 10px color-mix(in srgb,var(--bc) 35%,transparent),0 0 10px color-mix(in srgb,var(--bc) 50%,transparent)}
+.bub.soap{background:conic-gradient(from 40deg,#ff9bd666,#9bd6ff66,#9bffd666,#fff29b66,#ff9bd666);border-color:#ffffffcc}
+.bub.glossy{background:radial-gradient(circle at 30% 25%,#fff 0 10%,color-mix(in srgb,var(--bc) 55%,transparent) 40%,color-mix(in srgb,var(--bc) 75%,transparent));border-color:#fff}
+.bub.jelly{background:radial-gradient(circle at 35% 30%,#fff 0 8%,color-mix(in srgb,var(--bc) 65%,#fff) 40%,var(--bc));border:2px solid #fff9}
+@keyframes zf{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:var(--zo)}100%{transform:translate(var(--dx),calc(var(--rise)*-1)) scale(1.3);opacity:0}}
+@keyframes zw{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:var(--zo)}30%{transform:translate(calc(var(--dx)*.7),calc(var(--rise)*-.3)) scale(.9)}55%{transform:translate(calc(var(--dx)*-.7),calc(var(--rise)*-.55)) scale(1.05)}80%{transform:translate(calc(var(--dx)*.7),calc(var(--rise)*-.8)) scale(1.2);opacity:var(--zo)}100%{transform:translate(0,calc(var(--rise)*-1)) scale(1.3);opacity:0}}
+@keyframes zp{0%{transform:scale(0);opacity:0}18%{transform:scale(1.25);opacity:var(--zo)}30%{transform:scale(1)}80%{transform:translate(0,calc(var(--rise)*-.3));opacity:var(--zo)}100%{transform:translate(0,calc(var(--rise)*-.4)) scale(.9);opacity:0}}
+@keyframes zd{0%{transform:translate(0,0);opacity:0}20%{opacity:var(--zo)}100%{transform:translate(var(--dx),calc(var(--rise)*-1)) scale(1.1);opacity:0}}
+@keyframes bb{0%{transform:scale(.1);opacity:0}15%{opacity:var(--bo)}55%{transform:scale(1)}70%{transform:scale(.88)}85%{transform:scale(1.04)}93%{transform:scale(1.12);opacity:var(--bo)}100%{transform:scale(1.3);opacity:0}}
+@keyframes bs{0%{transform:scale(.1);opacity:0}15%{opacity:var(--bo)}50%{transform:scale(1)}70%{transform:scale(1.05)}100%{transform:scale(.05);opacity:0}}
+.fxh{position:absolute;width:28px;height:28px;margin:-14px;border:2px dashed #fff;border-radius:50%;background:#0006;cursor:move;display:none;place-items:center;z-index:5;color:#fff;font-weight:800}
+.ui{transition:opacity .2s}
+body[data-f="0"] .ui,body[data-l="1"] .menu{opacity:0;pointer-events:none}
+.box{background:var(--panel);border:2px solid var(--line);box-shadow:var(--sh);border-radius:22px}
+#lbar{position:absolute;left:8px;top:8px;bottom:8px;width:72px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 6px}
+#bars{flex:1;display:flex;gap:12px;min-height:0;width:100%;justify-content:center}
+.bc{display:flex;flex-direction:column;align-items:center;gap:4px}
+.bc small{font-size:10px;color:var(--mute)}
+.bar{position:relative;flex:1;width:22px;border-radius:12px;background:var(--track);border:2px solid var(--acc);box-shadow:inset 0 2px 6px #0003;touch-action:none;cursor:ns-resize}
+.fill{position:absolute;left:0;right:0;bottom:0;height:0;border-radius:10px;background:linear-gradient(0deg,var(--fa),var(--fb))}
+.bar.hot .fill{background:linear-gradient(0deg,#25c585,#8ff0c4)}
+.hd{position:absolute;left:50%;width:26px;height:24px;margin:0 0 -12px -13px;pointer-events:none}
+.hd svg{width:26px;height:24px;fill:var(--bad);stroke:#fff}
+.hd b{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-size:10px;background:var(--card);border-radius:8px;padding:1px 6px;white-space:nowrap;opacity:0;transition:opacity .15s}
+.bar:hover .hd b,.bar.drag .hd b{opacity:1}
+.ib{width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--sh);transition:transform .15s}
+.ib:hover{border-color:var(--acc);transform:scale(1.08)}.ib.on{background:var(--acc);color:#fff}.ib.off{color:var(--bad)}
+.pop{position:absolute;left:90px;bottom:8px;width:320px;max-height:calc(100% - 16px);overflow-y:auto;padding:14px;display:none}
+#cp{left:auto;right:84px;top:8px;bottom:auto;width:336px}
+.pop.open{display:block;animation:pp .18s ease-out}
+@keyframes pp{from{transform:translateY(8px);opacity:0}}
+.pop h2{margin:0 0 8px;font-size:16px}.pop h3{margin:14px 0 4px;font-size:13px;color:var(--acc);display:flex;align-items:center;gap:6px}
+.mt{color:var(--mute);margin:4px 0}
+label{display:block;margin:8px 0}label span{float:right;color:var(--mute)}
+.row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.rw{margin:8px 0}.rt{display:flex;align-items:center;gap:6px}.rt i{font-style:normal;flex:1}.rt span{color:var(--mute)}
+.rs{border:0;background:transparent;color:var(--mute);cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:8px}.rs:hover{color:var(--acc)}.rs.dim{opacity:.3}
+.rg{display:flex;align-items:center;gap:6px}
+.sw{width:46px;height:26px;border-radius:13px;border:2px solid var(--line);background:var(--track);position:relative;cursor:pointer;padding:0;flex-shrink:0;transition:background .2s,border-color .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0003;transition:transform .2s}
+.sw.on{background:var(--acc);border-color:var(--acc)}.sw.on::after{transform:translateX(20px)}
+input[type=range]{width:100%;accent-color:var(--acc)}
+select,input[type=text]{width:100%;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:6px 8px;font:inherit}
+.b{background:var(--acc2);color:var(--ink);border:0;border-radius:14px;padding:6px 12px;cursor:pointer;margin:2px;font:inherit;display:inline-flex;align-items:center;gap:5px}
+.b.on{background:var(--acc);color:#fff}.b.del{background:var(--bad);color:#fff}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.acc{margin:4px 0}
+.acc-h{width:100%;justify-content:flex-start;margin:0}
+.acc-t{flex:1;text-align:left}
+.acc-ar{font-size:10px;transition:transform .25s}
+.acc.open .acc-ar{transform:rotate(180deg)}
+.acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
+.acc.open .acc-body{grid-template-rows:1fr}
+.acc-in{overflow:hidden;min-height:0;visibility:hidden;transition:visibility .28s}
+.acc.open .acc-in{visibility:visible}
+.acc-pad{padding:2px 4px 8px}
+.slot{display:flex;align-items:center;gap:8px;margin:6px 0}.slot img{width:44px;height:44px;object-fit:contain;background:var(--line);border-radius:12px}.slot b{flex:1;font-weight:400}
+.ph{width:44px;height:44px;border-radius:12px;background:var(--line);display:grid;place-items:center;color:var(--mute);flex-shrink:0}.ph svg{width:32px;height:32px}
+.chip{display:inline-block;background:var(--acc2);border-radius:14px;padding:3px 10px;margin:2px;cursor:pointer}
+.sws{display:flex;gap:10px;margin:6px 0}
+.sws button{width:36px;height:36px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--line);cursor:pointer;padding:0}
+.sws button.on{box-shadow:0 0 0 3px var(--acc)}
+#sets{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:10px;padding:8px}
+#sets button{width:56px;height:56px;border-radius:18px;border:3px solid var(--line);background:var(--card);padding:0;cursor:pointer;overflow:hidden;color:var(--mute);font:600 20px inherit;display:grid;place-items:center;transition:transform .15s}
+#sets button.on{border-color:var(--acc);transform:scale(1.08);box-shadow:0 0 0 3px var(--acc2)}
+#sets img{width:100%;height:100%;object-fit:contain}
+#sets button.dragging{opacity:.4}
+#sets button.over{box-shadow:0 0 0 3px var(--acc)}
+#lk{position:absolute;right:14px;bottom:14px}
+#hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font-size:16px;text-shadow:0 1px 4px #0008;pointer-events:none}
+</style></head><body data-f="1" data-l="0" data-theme="blue">
+<svg width="0" height="0"><filter id="pst"><feComponentTransfer><feFuncR type="discrete"/><feFuncG type="discrete"/><feFuncB type="discrete"/></feComponentTransfer></filter></svg>
+<div id="stage"><div id="av"><img id="im" alt=""></div></div>
+<div id="fx"></div><div id="fxh" class="fxh">Z</div><div id="fxb" class="fxh">○</div>
+<div id="hint"></div>
+<div id="lbar" class="ui menu box">
+  <div id="bars">
+    <div class="bc"><div class="bar" id="b1"><div class="fill"></div><div class="hd"></div></div><small id="c1"></small></div>
+    <div class="bc"><div class="bar" id="b2"><div class="fill"></div><div class="hd"></div></div><small id="c2"></small></div>
+  </div>
+  <button class="ib" id="bmic" data-pop="mic"></button>
+  <button class="ib" id="bgear" data-pop="gear"></button>
+</div>
+<div id="pm" class="pop box ui menu"></div><div id="pg" class="pop box ui menu"></div>
+<div id="cp" class="pop box ui menu"></div>
+<div id="sets" class="ui menu box"></div>
+<button id="lk" class="ib ui"></button>
+<script>
+const { ipcRenderer: ipc } = require('electron');
+const $ = s => document.querySelector(s);
+const IC = {
+  gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  mic: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/>',
+  micoff: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M3 3l18 18"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  unlock: '<rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  heart: '<path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/>',
+  image: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
+  move: '<path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  display: '<rect x="2" y="4" width="20" height="13" rx="3"/><path d="M8 21h8M12 17v4"/>',
+  moon: '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+  keyboard: '<rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2.2-.5-1.3.3-2.3 1.7-2.3H18a3 3 0 0 0 3-3C21 7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>'
+};
+const svg = (n, c = '') => `<svg class="i ${c}" viewBox="0 0 24 24">${IC[n]}</svg>`;
+const sm = n => svg(n, 's');
+const face = k => { const o = k[1] == 'o', mo = k[3] == 'o';
+  return `<svg class="i" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/>${o ? '<circle cx="17" cy="20" r="2.2" fill="currentColor"/><circle cx="31" cy="20" r="2.2" fill="currentColor"/>' : '<path d="M13 20q4 4 8 0M27 20q4 4 8 0"/>'}${mo ? '<ellipse cx="24" cy="33" rx="4.5" ry="4"/>' : '<path d="M17 31q7 5 14 0"/>'}</svg>`; };
+const m = (on, ax, ay, per, pause) => ({ on, ax, ay, per, pause });
+const defMv = () => ({ talk: { bounce: m(1, 0, 14, .35, .1), wave: m(0, 10, 0, 1.5, 0), breathe: m(0, 0, 12, 3, 0) },
+                       idle: { bounce: m(0, 0, 6, .6, 1), wave: m(0, 8, 0, 2, 0), breathe: m(1, 0, 10, 3.5, .5) } });
+const defSleep = () => ({ tilt: 8, breath: .5, dim: 35,
+  zzz: { on: 1, style: 'classic', text: 'Z', count: 3, size: 56, freq: 1.4, dur: 3, rise: 110, drift: 40, spread: 28, stagger: .45, opacity: 100, glow: 14, col: '#ffffff', outline: '#2b4a8a', x: 60, y: -60, custom: '' },
+  bubble: { on: 1, style: 'classic', end: 'pop', col: '#7cc4ff', count: 1, size: 48, freq: 3.5, dur: 3.2, opacity: 100, spread: 40, x: -40, y: -10, custom: '' } });
+const newId = () => Math.random().toString(36).slice(2);
+const newSet = n => ({ name: n, id: newId(), keys: [], img: {}, size: 90, style: 'smooth', px: 4, col: 6,
+  mv: defMv(), blink: { min: 2, max: 6, dur: .14 }, sleep: defSleep() });
+const def = () => ({ cur: 0, theme: 'blue', lang: 'th', bg: '#00FF00', autoUpd: 1, sets: [newSet('ตัวละคร 1')],
+  mic: { dev: '', nr: 50, hp: 100, gain: 4, open: 12, release: .25, attack: .03, on: 1 },
+  keys: { switch: ['Ctrl+Alt+Right'], mute: ['Ctrl+M'], lock: ['Ctrl+Alt+L'] } });
+let S; try { S = JSON.parse(ipc.sendSync('load')) || def(); } catch { S = def(); }
+S = Object.assign(def(), S); S.mic = Object.assign(def().mic, S.mic); S.keys = Object.assign(def().keys, S.keys);
+S.mic.nr = S.mic.nr <= 1 ? (S.mic.nr ? 50 : 0) : S.mic.nr;
+S.sets.forEach(s => { s.id = s.id || newId(); s.keys = s.keys || []; delete s.bg;
+  if (!s.sleep || typeof s.sleep.zzz !== 'object') { const o = s.sleep || {}, n = defSleep();
+    n.tilt = o.tilt ?? n.tilt; n.breath = o.breath ?? n.breath; n.dim = o.dim ?? n.dim; n.custom = o.custom || '';
+    n.zzz.on = o.zzz ?? 1; n.bubble.on = o.bubble ?? 1; n.custom = o.custom || ''; s.sleep = n; }
+  s.sleep.zzz = Object.assign(defSleep().zzz, s.sleep.zzz); s.sleep.bubble = Object.assign(defSleep().bubble, s.sleep.bubble);
+  if (s.sleep.custom) { s.sleep.zzz.custom = s.sleep.custom; s.sleep.zzz.style = 'image'; } delete s.sleep.custom; });
+if (S.cur >= S.sets.length) S.cur = 0;
+const t = (th, en) => S.lang == 'en' ? en : th;
+const C = () => S.sets[S.cur];
+const U = { pop: '', ctab: 'img', open: !Object.values(C().img).some(Boolean) };
+let VER = '', upd = { state: '' }, lastLang;
+const updText = () => { const s = upd;
+  return { checking: t('กำลังตรวจสอบ...', 'Checking...'), none: t('เป็นเวอร์ชันล่าสุดแล้ว', 'You are up to date'),
+    available: t('พบเวอร์ชันใหม่ ', 'New version ') + (s.version || '') + t('', ' available'), downloading: t('กำลังโหลด ', 'Downloading ') + (s.percent || 0) + '%',
+    ready: t('โหลดเสร็จ รีสตาร์ทเพื่อติดตั้ง', 'Downloaded. Restart to install'), error: t('ตรวจสอบไม่สำเร็จ', 'Update check failed') + (s.message ? ' (' + s.message + ')' : ''),
+    dev: t('ใช้ได้เฉพาะโปรแกรมที่ติดตั้งแล้ว (ไม่ใช่โหมด npm start)', 'Only works in the installed app (not npm start)') }[s.state] || ''; };
+let tmr, locked = false, mvMode = 'talk', devs = [], cap = null;
+const save = () => { clearTimeout(tmr); tmr = setTimeout(() => ipc.send('save', JSON.stringify(S)), 300); };
+const R = p => { const [r, ...k] = p.split('.'); return [r == 'C' ? C() : S, k]; };
+const gv = p => { const [o, k] = R(p); return k.reduce((a, x) => a[x], o); };
+const sv = (p, v) => { const [o, k] = R(p); const l = k.pop(); k.reduce((a, x) => a[x], o)[l] = v; };
+const DEF = def(), DSET = newSet('');
+const dv = p => { const [r, ...k] = p.split('.'); return k.reduce((a, x) => a[x], r == 'C' ? DSET : DEF); };
+const isDef = p => { try { return String(gv(p)).toLowerCase() == String(dv(p)).toLowerCase(); } catch { return true; } };
+const rsb = p => p == 'C.name' ? '' : `<button class="rs ${isDef(p) ? 'dim' : ''}" data-rs="${p}" title="${t('คืนค่าเริ่มต้น', 'Reset to default')}">${sm('refresh')}</button>`;
+const rng = (l, p, a, b, s = 1) => `<div class=rw><div class=rt><i>${l}</i><span>${gv(p)}</span>${rsb(p)}</div><input type=range data-p="${p}" min=${a} max=${b} step=${s} value=${gv(p)}></div>`;
+const chk = (l, p) => `<div class=row><span>${l}</span><span class=rg>${rsb(p)}<button class="sw ${gv(p) ? 'on' : ''}" data-tg="${p}" role=switch aria-checked="${!!gv(p)}"></button></span></div>`;
+const col = (l, p) => `<div class=row><span>${l}</span><span class=rg><input type=color data-p="${p}" value="${gv(p)}">${rsb(p)}</span></div>`;
+const sel = (l, p, o) => `<div class=rw><div class=rt><i>${l}</i>${rsb(p)}</div><select data-p="${p}">${o.map(([v, x]) => `<option value="${v}" ${gv(p) == v ? 'selected' : ''}>${x}</option>`).join('')}</select></div>`;
+const txt = (l, p) => `<div class=rw><div class=rt><i>${l}</i>${rsb(p)}</div><input type=text maxlength=6 data-p="${p}" value="${gv(p)}"></div>`;
+const slot = (l, k) => { const u = gv('C.' + k), n = k.split('.').pop();
+  const ph = u ? `<img src="${u}" alt="">` : `<span class=ph>${n == 'off' ? svg('micoff') : n == 'custom' ? svg('image') : face(n)}</span>`;
+  return `<div class=slot>${ph}<b>${l}</b><button class=b data-pick="C.${k}">${t('เลือก', 'Choose')}</button>${u ? `<button class=b data-clear="C.${k}">${t('ลบ', 'Remove')}</button>` : ''}</div>`; };
+const keysFor = a => a == 'set' ? C().keys : S.keys[a];
+const allCombos = () => [...Object.values(S.keys).flat(), ...S.sets.flatMap(s => s.keys)];
+const keyChips = a => keysFor(a).map((k, i) => `<span class=chip data-rm="${a}.${i}" title="${t('คลิกเพื่อลบ', 'Click to remove')}">${k} ✕</span>`).join('') + `<button class=b data-add="${a}">${cap == a ? t('กดคีย์ที่ต้องการ... (Esc ยกเลิก)', 'Press a key... (Esc to cancel)') : t('+ เพิ่มคีย์', '+ Add key')}</button>` + (a != 'set' ? `<button class=rs data-rk="${a}" title="${t('คืนค่าเริ่มต้น', 'Reset to default')}">${sm('refresh')}</button>` : '');
+const KEYS3 = ['bounce', 'wave', 'breathe'];
+const MOTN = () => [['bounce', t('เด้ง', 'Bounce')], ['wave', t('Wave (ส่าย)', 'Wave')], ['breathe', t('หายใจ', 'Breathe')]];
+const rt = k => `<p><button class=b data-act=resettab data-k=${k}>${sm('refresh')}${t('รีเซ็ตแท็บนี้', 'Reset this tab')}</button></p>`;
+const ZS = () => [['classic', t('คลาสสิก (แบบเดิม)', 'Classic (original)')], ['wave', t('โบกส่าย', 'Wavy')], ['pop', t('ป๊อป', 'Pop')], ['drift', t('ลอยช้า', 'Slow drift')], ['image', t('ใช้ภาพของตัวเอง', 'Custom image')]];
+const BS = () => [['classic', t('คลาสสิก (ฟ้าใส)', 'Classic (clear blue)')], ['soap', t('ฟองสบู่รุ้ง', 'Rainbow soap')], ['glossy', t('เงามัน', 'Glossy')], ['jelly', t('เจลลี่ขุ่น', 'Jelly')], ['image', t('ใช้ภาพของตัวเอง', 'Custom image')]];
+const P = {
+  img: () => `<label>${t('ชื่อตัวละคร', 'Character name')}<input type=text data-p="C.name" value="${C().name}"></label>
+    <button class=b data-act=dup>${sm('copy')}${t('คัดลอกตัวละคร', 'Duplicate')}</button><button class="b del" data-act=del>${sm('trash')}${t('ลบตัวละครนี้', 'Delete character')}</button>
+    ${slot(t('ลืมตา ปิดปาก', 'Eyes open, mouth closed'), 'img.eoMc')}${slot(t('ลืมตา อ้าปาก', 'Eyes open, mouth open'), 'img.eoMo')}${slot(t('หลับตา ปิดปาก', 'Eyes closed, mouth closed'), 'img.ecMc')}${slot(t('หลับตา อ้าปาก', 'Eyes closed, mouth open'), 'img.ecMo')}${slot(t('ตอนปิดไมค์ (ไม่ใส่จะใช้ภาพหลับตาปิดปาก)', 'Mic off (uses eyes closed, mouth closed if empty)'), 'img.off')}<p class=mt>${t('รองรับ PNG / GIF', 'PNG / GIF supported')}</p>`,
+  mv: () => `<button class="b ${mvMode == 'talk' ? 'on' : ''}" data-mode=talk>${t('ตอนพูด', 'Talking')}</button><button class="b ${mvMode == 'idle' ? 'on' : ''}" data-mode=idle>${t('ตอนไม่พูด', 'Idle')}</button>
+    <div><button class=b data-act=resetmv>${sm('refresh')}${t('รีเซ็ตโหมดนี้', 'Reset this mode')}</button><button class=b data-act=resetall>${sm('refresh')}${t('รีเซ็ตทั้งหมด', 'Reset all')}</button></div>
+    ${MOTN().map(([k, n]) => `<h3>${n}</h3>${chk(t('เปิด', 'Enabled'), `C.mv.${mvMode}.${k}.on`)}${rng(t('ระยะแกน X (px)', 'X distance (px)'), `C.mv.${mvMode}.${k}.ax`, 0, 80)}${rng(t('ระยะแกน Y (px)', 'Y distance (px)'), `C.mv.${mvMode}.${k}.ay`, 0, 80)}${rng(t('ช่วงเวลา 1 รอบ (วิ)', 'Cycle time (s)'), `C.mv.${mvMode}.${k}.per`, .1, 8, .05)}${rng(t('เว้นช่วงระหว่างรอบ (วิ)', 'Pause between cycles (s)'), `C.mv.${mvMode}.${k}.pause`, 0, 8, .05)}`).join('')}`,
+  blink: () => `${rng(t('ห่างน้อยสุด (วิ)', 'Min interval (s)'), 'C.blink.min', .5, 10, .1)}${rng(t('ห่างมากสุด (วิ)', 'Max interval (s)'), 'C.blink.max', .5, 15, .1)}${rng(t('หลับตานาน (วิ)', 'Blink duration (s)'), 'C.blink.dur', .05, .6, .01)}${rt('blink')}`,
+  disp: () => `${rng(t('ขนาดตัวละคร (%)', 'Character size (%)'), 'C.size', 20, 100)}
+    ${sel(t('สไตล์ภาพ', 'Image style'), 'C.style', [['smooth', 'Smooth'], ['pixel', 'Pixel'], ['8bit', '8-bit']])}${rng(t('ความหยาบพิกเซล', 'Pixel size'), 'C.px', 2, 24)}${rng(t('จำนวนสี/ช่อง (8-bit)', 'Colors per channel (8-bit)'), 'C.col', 2, 16)}${rt('disp')}`,
+  sleep: () => { const z = 'C.sleep.zzz.', b = 'C.sleep.bubble.'; return `<p class=mt>${t('แสดงตอนปิดไมค์ ลากวงกลมบนหน้าต่างเพื่อย้ายตำแหน่ง (Z = Zzz, ○ = ฟองน้ำมูก)', 'Shown when the mic is off. Drag the circles on the window to move them (Z = Zzz, ○ = snot bubble).')}</p>
+    <h3>Zzz</h3>${chk(t('เปิด', 'Enabled'), z + 'on')}${sel(t('รูปแบบ', 'Style'), z + 'style', ZS())}${txt(t('ตัวอักษร/อีโมจิ', 'Text / emoji'), z + 'text')}
+    ${rng(t('ความเยอะ (ตัวต่อรอบ)', 'Amount (per burst)'), z + 'count', 1, 8)}${rng(t('ขนาด', 'Size'), z + 'size', 12, 200)}${rng(t('ความถี่ (ทุกกี่วินาที)', 'Every (seconds)'), z + 'freq', .5, 8, .1)}${rng(t('ระยะเวลาลอย (วิ)', 'Float time (s)'), z + 'dur', 1, 10, .1)}
+    ${rng(t('ระยะลอยขึ้น (px)', 'Rise distance (px)'), z + 'rise', 20, 400)}${rng(t('เอียงข้างขณะลอย (px)', 'Sideways drift (px)'), z + 'drift', -200, 200)}${rng(t('ระยะห่างระหว่างตัว (px)', 'Spacing (px)'), z + 'spread', 0, 120)}${rng(t('หน่วงระหว่างตัว (วิ)', 'Delay between letters (s)'), z + 'stagger', 0, 1.5, .05)}
+    ${rng(t('ความทึบ (%)', 'Opacity (%)'), z + 'opacity', 10, 100)}${rng(t('เรืองแสง', 'Glow'), z + 'glow', 0, 40)}${col(t('สี Zzz', 'Zzz color'), z + 'col')}${col(t('สีขอบ/เรืองแสง', 'Outline / glow'), z + 'outline')}
+    ${rng(t('ตำแหน่ง X', 'Position X'), z + 'x', -600, 600)}${rng(t('ตำแหน่ง Y', 'Position Y'), z + 'y', -400, 400)}${slot(t('ภาพของตัวเอง (PNG/GIF)', 'Custom image (PNG/GIF)'), 'sleep.zzz.custom')}
+    <h3>${t('ฟองน้ำมูก', 'Snot bubble')}</h3>${chk(t('เปิด', 'Enabled'), b + 'on')}${sel(t('รูปแบบ', 'Style'), b + 'style', BS())}${sel(t('ตอนจบ', 'Ending'), b + 'end', [['pop', t('แตก', 'Pop')], ['deflate', t('ค่อยๆ ยุบ', 'Deflate')]])}${col(t('สีฟอง', 'Bubble tint'), b + 'col')}
+    ${rng(t('ความเยอะ (ฟองต่อรอบ)', 'Amount (per burst)'), b + 'count', 1, 5)}${rng(t('ขนาด', 'Size'), b + 'size', 12, 200)}${rng(t('ความถี่ (ทุกกี่วินาที)', 'Every (seconds)'), b + 'freq', .5, 8, .1)}${rng(t('ระยะเวลา (วิ)', 'Duration (s)'), b + 'dur', 1, 10, .1)}
+    ${rng(t('ความทึบ (%)', 'Opacity (%)'), b + 'opacity', 10, 100)}${rng(t('ระยะห่างระหว่างฟอง (px)', 'Spacing (px)'), b + 'spread', 0, 150)}${rng(t('ตำแหน่ง X', 'Position X'), b + 'x', -600, 600)}${rng(t('ตำแหน่ง Y', 'Position Y'), b + 'y', -400, 400)}${slot(t('ภาพของตัวเอง (PNG/GIF)', 'Custom image (PNG/GIF)'), 'sleep.bubble.custom')}
+    <h3>${t('อื่นๆ', 'Other')}</h3>${rng(t('เอียงหัว (องศา)', 'Head tilt (deg)'), 'C.sleep.tilt', 0, 30)}${rng(t('หายใจช้าลง (x ความเร็ว)', 'Breathing speed (x)'), 'C.sleep.breath', .1, 1.5, .05)}${rng(t('ภาพมืดลง (%)', 'Dim (%)'), 'C.sleep.dim', 0, 80)}${rt('sleep')}`; },
+  keys: () => `<p class=mt>${t('กดแล้วสลับมาตัวนี้ทันที เช่น Ctrl+1 ใช้ได้แม้อยู่ในเกม ใส่ได้หลายคอมโบ', 'Jump to this character instantly, e.g. Ctrl+1. Works in-game; multiple combos allowed.')}</p>${keyChips('set')}`
+};
+const CTABS = () => [['img', 'image', t('ภาพ', 'Images')], ['mv', 'move', t('มูฟเมนต์', 'Movement')], ['blink', 'eye', t('กะพริบตา', 'Blink')], ['disp', 'display', t('แสดงผล', 'Display')], ['sleep', 'moon', t('หลับ', 'Sleep')], ['keys', 'keyboard', t('คีย์ลัด', 'Hotkeys')]];
+const BGS = [['#00FF00', 'Green'], ['#0000FF', 'Blue'], ['#FF00FF', 'Magenta']];
+const popMic = () => `<h2>${t('ตั้งค่าไมค์', 'Microphone')}</h2><button class="b ${S.mic.on ? 'on' : ''}" data-mic style="width:100%;justify-content:center">${sm(S.mic.on ? 'mic' : 'micoff')}${S.mic.on ? t('ไมค์เปิดอยู่ (กดเพื่อปิด)', 'Mic is ON (click to turn off)') : t('ไมค์ปิดอยู่ (กดเพื่อเปิด)', 'Mic is OFF (click to turn on)')}</button>
+  ${sel(t('อุปกรณ์ไมค์', 'Input device'), 'S.mic.dev', [['', t('ค่าเริ่มต้น', 'Default')], ...devs.map(d => [d.deviceId, d.label || 'Mic'])])}
+  ${rng(t('ลดเสียงรบกวน (%)', 'Noise reduction (%)'), 'S.mic.nr', 0, 100)}${rng(t('ตัดเสียงต่ำ (Hz)', 'Low cut (Hz)'), 'S.mic.hp', 0, 400, 10)}${rng(t('ความแรงสัญญาณ (gain)', 'Input gain'), 'S.mic.gain', 1, 20, .5)}${rng(t('เวลาตอบสนองตอนเริ่มพูด (วิ)', 'Attack time (s)'), 'S.mic.attack', 0, .5, .01)}
+  <p class=mt>${t('ระดับดูดเสียงและเวลาหน่วง ปรับได้ด้วยการลากหัวใจบนหลอดเสียงด้านซ้าย (ดับเบิลคลิกที่หลอดเพื่อคืนค่าเริ่มต้น)', 'Gate level and delay: drag the hearts on the bars at the left (double-click a bar to reset it).')}</p>
+  <button class=b data-act=resetmic>${sm('refresh')}${t('คืนค่าเริ่มต้นไมค์ทั้งหมด', 'Reset all mic settings')}</button>`;
+const popGear = () => `<h2>${t('ตั้งค่าทั่วไป', 'General settings')}</h2>
+  <h3>${sm('globe')}${t('ภาษา', 'Language')}</h3>${sel('', 'S.lang', [['th', 'ไทย'], ['en', 'English']])}
+  <h3>${sm('sun')}${t('ธีมสี', 'Theme')}</h3>${sel('', 'S.theme', [['blue', t('ฟ้าพาสเทล', 'Pastel blue')], ['night', t('โหมดมืด (ฟ้าม่วง)', 'Dark (blue-violet)')]])}
+  <h3>${sm('palette')}${t('สีพื้นหลัง (ใช้กับทุกตัวละคร)', 'Background color (all characters)')}</h3>
+  <div class=sws>${BGS.map(([c, n]) => `<button data-bg="${c}" title="${n} ${c}" style="background:${c}"></button>`).join('')}</div>${col('RGB', 'S.bg')}
+  <h3>${sm('keyboard')}${t('คีย์ลัดทั่วไป', 'General hotkeys')}</h3><p class=mt>${t('ใช้ได้แม้กำลังเล่นเกม ใส่ได้หลายคอมโบ ต้องมีปุ่มปกติร่วมด้วย', 'Work in-game, multiple combos allowed, needs a normal key too.')}</p>
+  ${[['switch', t('สลับไปตัวละครถัดไป', 'Next character')], ['mute', t('ปิด/เปิดไมค์', 'Mute / unmute mic')], ['lock', t('ล็อก/ปลดล็อก', 'Lock / unlock')]].map(([a, n]) => `<h3>${n}</h3>${keyChips(a)}`).join('')}
+  <h3>${t('คีย์ลัดของแต่ละตัวละคร', 'Per-character hotkeys')}</h3><p class=mt>${t('ตั้งได้ที่หน้าตั้งค่าของตัวละครนั้นๆ', 'Set them in each character settings.')}</p>${S.sets.map(x => `<div>${x.name}: ${x.keys.join(', ') || '-'}</div>`).join('')}
+  <h3>${sm('refresh')}${t('เวอร์ชันและอัปเดต', 'Version & updates')}</h3>
+  <div class=row><span>${t('เวอร์ชันปัจจุบัน', 'Current version')}</span><b>${VER || '-'}</b></div>
+  ${chk(t('ตรวจอัปเดตอัตโนมัติตอนเปิดโปรแกรม', 'Check for updates on startup'), 'S.autoUpd')}
+  <button class=b data-act=updcheck>${sm('refresh')}${t('ตรวจสอบอัปเดต', 'Check for updates')}</button>
+  <p class=mt id=updst>${updText()}</p>`;
+function renderSets() {
+  $('#sets').innerHTML = S.sets.map((s, i) => `<button data-set=${i} draggable="true" class="${i == S.cur ? 'on' : ''}" title="${s.name}">${s.img.eoMc ? `<img src="${s.img.eoMc}" draggable="false">` : svg('user')}</button>`).join('') + `<button data-newset title="${t('เพิ่มตัวละคร', 'Add character')}">${svg('plus')}</button>`;
+}
+function fxVis() {
+  const sl = U.open && U.ctab == 'sleep'; $('#fxh').style.display = sl && C().sleep.zzz.on ? 'grid' : 'none'; $('#fxb').style.display = sl && C().sleep.bubble.on ? 'grid' : 'none';
+}
+function renderChar() {
+  const p = $('#cp'); p.classList.toggle('open', U.open);
+  if (U.open) { const y = p.scrollTop;
+    p.innerHTML = `<h2>${C().name}</h2>` + CTABS().map(([k, ic, n]) => `<div class="acc ${U.ctab == k ? 'open' : ''}" data-k=${k}><button class="b acc-h ${U.ctab == k ? 'on' : ''}" data-acc=${k} aria-expanded="${U.ctab == k}">${sm(ic)}<span class=acc-t>${n}</span><span class=acc-ar>▼</span></button><div class=acc-body><div class=acc-in><div class=acc-pad>${P[k]()}</div></div></div></div>`).join('') + `<p style="text-align:right"><button class=b data-close>${t('ปิด', 'Close')}</button></p>`;
+    p.scrollTop = y; }
+  fxVis();
+}
+function renderPops() {
+  $('#pm').classList.toggle('open', U.pop == 'mic'); $('#pg').classList.toggle('open', U.pop == 'gear');
+  const sy = U.pop == 'mic' ? $('#pm').scrollTop : $('#pg').scrollTop;
+  if (U.pop == 'mic') { $('#pm').innerHTML = popMic(); $('#pm').scrollTop = sy; } if (U.pop == 'gear') { $('#pg').innerHTML = popGear(); $('#pg').scrollTop = sy; }
+  $('#bmic').innerHTML = svg(S.mic.on ? 'mic' : 'micoff'); $('#bmic').classList.toggle('off', !S.mic.on); $('#bmic').classList.toggle('on', U.pop == 'mic');
+  $('#bgear').innerHTML = svg('gear'); $('#bgear').classList.toggle('on', U.pop == 'gear');
+}
+const render = () => { renderSets(); renderChar(); renderPops(); apply(); };
+function bars() {
+  const o = S.mic.open, r = Math.round(S.mic.release * 1000);
+  $('#b1 .hd').style.bottom = o + '%'; $('#b1 .hd b').textContent = o + '%';
+  $('#b2 .hd').style.bottom = r / 15 + '%'; $('#b2 .hd b').textContent = r + ' ms';
+}
+function apply() {
+  const s = C(), im = $('#im'), L = s.style == 'smooth' ? 1 : s.px, H = $('#stage').clientHeight * s.size / 100;
+  im.style.height = H / L + 'px'; im.style.imageRendering = L > 1 ? 'pixelated' : 'auto'; im.style.transform = `scale(${L})`;
+  im.style.filter = s.style == '8bit' ? 'url(#pst)' : 'none';
+  const tv = Array.from({ length: s.col }, (_, i) => (i / (s.col - 1)).toFixed(3)).join(' ');
+  document.querySelectorAll('#pst feFuncR,#pst feFuncG,#pst feFuncB').forEach(e => e.setAttribute('tableValues', tv));
+  document.body.style.background = $('#stage').style.background = S.bg;
+  document.querySelectorAll('[data-bg]').forEach(b => b.classList.toggle('on', b.dataset.bg.toLowerCase() == S.bg.toLowerCase()));
+  for (const [id, k] of [['#fxh', 'zzz'], ['#fxb', 'bubble']]) { $(id).style.left = 'calc(50% + ' + s.sleep[k].x + 'px)'; $(id).style.top = 'calc(50% + ' + s.sleep[k].y + 'px)'; }
+  const hint = $('#hint'); if (!hint.dataset.err) hint.textContent = t('คลิกที่รูปตัวละครด้านขวา แล้วใส่ภาพของคุณได้เลย ✨', 'Click the character on the right, then add your images ✨');
+  hint.style.display = hint.dataset.err || !Object.values(s.img).some(Boolean) ? 'flex' : 'none';
+  $('#c1').textContent = t('เสียง', 'Level'); $('#c2').textContent = t('หน่วง', 'Delay');
+  $('#bmic').title = t('ตั้งค่าไมค์', 'Microphone'); $('#bgear').title = t('ตั้งค่าทั่วไป', 'General settings'); $('#lk').title = 'Lock / Unlock';
+  $('#lk').innerHTML = svg(locked ? 'lock' : 'unlock'); document.body.dataset.l = locked ? 1 : 0; document.body.dataset.theme = S.theme;
+  if (lastLang !== S.lang) { lastLang = S.lang; ipc.send('lang', S.lang); }
+  bars();
+}
+document.querySelectorAll('.hd').forEach(h => h.innerHTML = svg('heart') + '<b></b>');
+['b1', 'b2'].forEach((id, k) => {
+  const el = $('#' + id);
+  const set = e => { const r = el.getBoundingClientRect(), v = Math.min(1, Math.max(0, (r.bottom - e.clientY) / r.height));
+    if (k == 0) S.mic.open = Math.max(1, Math.round(v * 100)); else S.mic.release = Math.round(v * 1500) / 1000; bars(); save(); };
+  el.onpointerdown = e => { el.setPointerCapture(e.pointerId); el.classList.add('drag'); set(e); el.onpointermove = set; };
+  el.onpointerup = () => { el.classList.remove('drag'); el.onpointermove = null; };
+  el.ondblclick = () => { if (k == 0) S.mic.open = DEF.mic.open; else S.mic.release = DEF.mic.release; bars(); save(); };
+});
+document.addEventListener('input', e => {
+  const p = e.target.dataset.p; if (!p) return;
+  const v = e.target.type == 'range' ? +e.target.value : e.target.value;
+  sv(p, v); const sp = e.target.parentNode.querySelector('span'); if (sp) sp.textContent = v;
+  if (p == 'S.mic.dev') startMic(); if (p == 'S.mic.hp' && hp) hp.frequency.value = v;
+  if (p == 'C.name') renderSets(); else if (p == 'S.lang') render(); else apply(); save();
+});
+document.addEventListener('click', async e => {
+  const tg = e.target, el = tg.closest('[data-pop],[data-mic],[data-set],[data-newset],[data-pick],[data-clear],[data-mode],[data-act],[data-rm],[data-add],[data-ctab],[data-close],[data-tg],[data-bg],[data-rs],[data-rk],[data-acc]');
+  if (!el) { if (!tg.closest('.pop') && U.pop) { U.pop = ''; renderPops(); } return; }
+  const d = el.dataset;
+  if (d.pop) { U.pop = U.pop == d.pop ? '' : d.pop; renderPops(); }
+  else if (d.tg) { const v = +!gv(d.tg); sv(d.tg, v); el.classList.toggle('on', !!v); el.setAttribute('aria-checked', !!v); if (/\.sleep\./.test(d.tg)) renderChar(); apply(); save(); }
+  else if (d.rs) { const p = d.rs; sv(p, structuredClone(dv(p))); if (p == 'S.mic.dev') startMic(); if (p == 'S.mic.hp' && hp) hp.frequency.value = gv(p); render(); save(); }
+  else if (d.rk) { const a = d.rk, used = new Set(allCombos()); S.keys[a].forEach(x => used.delete(x)); S.keys[a] = DEF.keys[a].filter(x => !used.has(x)); sendKeys(); render(); save(); }
+  else if (d.bg) { S.bg = d.bg; const ci = document.querySelector('#pg input[type=color]'); if (ci) ci.value = d.bg; apply(); save(); }
+  else if (d.mic !== undefined) toggleMic();
+  else if (d.set !== undefined) { const i = +d.set; if (i == S.cur && U.open) U.open = false; else { S.cur = i; U.open = true; } render(); save(); }
+  else if (d.newset !== undefined) { S.sets.push(newSet(t('ตัวละคร ', 'Character ') + (S.sets.length + 1))); S.cur = S.sets.length - 1; U.open = true; U.ctab = 'img'; render(); save(); sendKeys(); }
+  else if (d.acc) { U.ctab = U.ctab == d.acc ? '' : d.acc;
+    document.querySelectorAll('#cp .acc').forEach(a => { const o = a.dataset.k == U.ctab; a.classList.toggle('open', o); const hb = a.querySelector('.acc-h'); hb.classList.toggle('on', o); hb.setAttribute('aria-expanded', o); });
+    fxVis(); if (U.ctab) setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 40); }
+  else if (d.close !== undefined) { U.open = false; renderChar(); }
+  else if (d.pick) { const u = await ipc.invoke('pick'); if (u) { sv(d.pick, u); if (/sleep\.(zzz|bubble)\.custom$/.test(d.pick)) sv(d.pick.replace('custom', 'style'), 'image'); render(); save(); } }
+  else if (d.clear) { sv(d.clear, ''); const sp = d.clear.replace('custom', 'style'); if (/sleep\.(zzz|bubble)\.style$/.test(sp) && gv(sp) == 'image') sv(sp, 'classic'); render(); save(); }
+  else if (d.mode) { mvMode = d.mode; renderChar(); }
+  else if (d.act == 'updcheck') { upd = { state: 'checking' }; const el = $('#updst'); if (el) el.textContent = updText(); ipc.send('upd-check', true); }
+  else if (d.act == 'resetmic') { const on = S.mic.on; S.mic = structuredClone(DEF.mic); S.mic.on = on; startMic(); render(); save(); }
+  else if (d.act == 'resettab') { const c = C(), k = d.k; if (k == 'blink') c.blink = structuredClone(DSET.blink); if (k == 'disp') { c.size = DSET.size; c.style = DSET.style; c.px = DSET.px; c.col = DSET.col; } if (k == 'sleep') c.sleep = structuredClone(DSET.sleep); render(); save(); }
+  else if (d.act == 'resetmv') { C().mv[mvMode] = defMv()[mvMode]; renderChar(); save(); }
+  else if (d.act == 'resetall') { if (confirm(t('รีเซ็ตมูฟเมนต์ทั้งหมดของตัวละครนี้?', 'Reset all movement of this character?'))) { C().mv = defMv(); renderChar(); save(); } }
+  else if (d.act == 'dup') { const c = structuredClone(C()); c.name += ' copy'; c.id = newId(); c.keys = []; S.sets.push(c); S.cur = S.sets.length - 1; render(); save(); }
+  else if (d.act == 'del') { if (S.sets.length < 2) alert(t('ต้องเหลืออย่างน้อย 1 ตัวละคร', 'At least one character is required')); else if (confirm(t('ลบตัวละคร "', 'Delete character "') + C().name + '" ?')) { S.sets.splice(S.cur, 1); S.cur = Math.max(0, S.cur - 1); sendKeys(); render(); save(); } }
+  else if (d.rm) { const [a, i] = d.rm.split('.'); keysFor(a).splice(+i, 1); sendKeys(); render(); save(); }
+  else if (d.add) { cap = d.add; render(); }
+});
+$('#lk').onclick = () => { locked = !locked; apply(); };
+let dragI = null; const setsEl = $('#sets');
+setsEl.addEventListener('dragstart', e => { const b = e.target.closest('[data-set]'); if (!b) return; dragI = +b.dataset.set; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(dragI)); b.classList.add('dragging'); });
+setsEl.addEventListener('dragover', e => { if (dragI === null) return; e.preventDefault(); setsEl.querySelectorAll('.over').forEach(x => x.classList.remove('over')); const b = e.target.closest('[data-set]'); if (b) b.classList.add('over'); });
+setsEl.addEventListener('drop', e => { e.preventDefault(); const b = e.target.closest('[data-set]');
+  if (b && dragI !== null) { const j = +b.dataset.set; if (j !== dragI) { const id = C().id; const [mv] = S.sets.splice(dragI, 1); S.sets.splice(j, 0, mv); S.cur = S.sets.findIndex(s => s.id == id); render(); save(); } } dragI = null; });
+setsEl.addEventListener('dragend', () => { dragI = null; renderSets(); });
+document.addEventListener('keydown', e => {
+  if (!cap) return; e.preventDefault();
+  if (e.key == 'Escape') { cap = null; return render(); }
+  if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return;
+  const map = { ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right', ' ': 'Space' };
+  const k = map[e.key] || (e.key.length == 1 ? e.key.toUpperCase() : e.key);
+  const a = [e.ctrlKey && 'Ctrl', e.altKey && 'Alt', e.shiftKey && 'Shift', e.metaKey && 'Super', k].filter(Boolean).join('+');
+  if (allCombos().includes(a)) alert(a + t(' ถูกใช้แล้ว', ' is already in use')); else keysFor(cap).push(a);
+  cap = null; sendKeys(); render(); save();
+}, true);
+const sendKeys = () => { const mp = { ...S.keys }; S.sets.forEach(s => mp['set:' + s.id] = s.keys); ipc.send('hotkeys', mp); };
+ipc.on('hotkey', (e, a) => {
+  if (a.startsWith('set:')) { const i = S.sets.findIndex(s => 'set:' + s.id == a); if (i >= 0) { S.cur = i; render(); save(); } }
+  if (a == 'switch') { S.cur = (S.cur + 1) % S.sets.length; render(); save(); }
+  if (a == 'mute') toggleMic();
+  if (a == 'lock') { locked = !locked; apply(); }
+});
+ipc.on('focus', (e, f) => document.body.dataset.f = f ? 1 : 0);
+const toggleMic = () => { S.mic.on = S.mic.on ? 0 : 1; render(); save(); };
+let ac, an, hp, buf = new Float32Array(1024), stream;
+async function startMic() {
+  try {
+    if (stream) stream.getTracks().forEach(x => x.stop()); if (ac) ac.close();
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: S.mic.dev ? { exact: S.mic.dev } : undefined, noiseSuppression: false, echoCancellation: false, autoGainControl: false } });
+    stream.getAudioTracks()[0].onended = () => setTimeout(startMic, 1000);
+    ac = new AudioContext(); if (ac.state == 'suspended') ac.resume();
+    const src = ac.createMediaStreamSource(stream);
+    hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = S.mic.hp;
+    an = ac.createAnalyser(); an.fftSize = 1024; src.connect(hp); hp.connect(an);
+    const h = $('#hint'); delete h.dataset.err; apply();
+    devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind == 'audioinput'); if (U.pop == 'mic') renderPops();
+  } catch (err) { const h = $('#hint'); h.dataset.err = 1; h.textContent = t('เปิดไมค์ไม่ได้: ', 'Cannot open mic: ') + err.message; h.style.display = 'flex'; }
+}
+const mot = (q, tm, k) => { const c = q.per + q.pause; if (!q.on || q.per <= 0) return 0; const ph = (tm % c) / q.per; if (ph > 1) return 0;
+  return k == 'bounce' ? -Math.sin(Math.PI * ph) : k == 'wave' ? Math.sin(2 * Math.PI * ph) : (1 - Math.cos(2 * Math.PI * ph)) / 2; };
+const calc = mv => { let x = 0, y = 0, sx = 1, sy = 1; for (const k of KEYS3) { const q = mv[k], v = mot(q, tt, k);
+  if (k == 'breathe') { sx += q.ax * v / 400; sy += q.ay * v / 400 } else { x += q.ax * v; y += q.ay * v } } return [x, y, sx, sy]; };
+let last = performance.now(), tt = 0, mix = 0, zt = 0, bt = 0, lvl = 0, floor = 0, speaking = false, above = 0, below = 0, blinkEnd = 0, nextB = 0, tiltV = 0, dimV = 0, cur = '', hot = false;
+function spawnZ(sl) {
+  const z = sl.zzz, f = $('#fx'), st = z.style == 'image' && !z.custom ? 'classic' : z.style, n = Math.max(1, z.count);
+  const an_ = { classic: 'zf', wave: 'zw', pop: 'zp', drift: 'zd', image: 'zf' }[st] || 'zf';
+  for (let i = 0; i < n; i++) {
+    const k = (st == 'classic' || st == 'wave') ? (n == 1 ? 1 : .65 + .55 * i / (n - 1)) : 1, fs = z.size * k; let el;
+    if (st == 'image') { el = document.createElement('img'); el.src = z.custom; Object.assign(el.style, { width: z.size + 'px', marginLeft: -z.size / 2 + 'px', marginTop: -z.size / 2 + 'px' }); }
+    else { el = document.createElement('span'); el.textContent = z.text || 'Z'; const o = z.outline;
+      Object.assign(el.style, { fontSize: fs + 'px', color: z.col, webkitTextStroke: Math.max(3, fs / 9) + 'px ' + o, paintOrder: 'stroke fill', textShadow: `0 0 ${z.glow}px ${o},0 0 4px ${o}` }); }
+    Object.assign(el.style, { left: z.x + i * z.spread + 'px', top: z.y - i * z.spread * .8 + 'px', animationName: an_, animationDuration: z.dur + 's', animationDelay: i * z.stagger + 's' });
+    el.style.setProperty('--rise', z.rise + 'px'); el.style.setProperty('--dx', z.drift + 'px'); el.style.setProperty('--zo', z.opacity / 100);
+    el.onanimationend = () => el.remove(); f.appendChild(el);
+  }
+}
+function spawnB(b) {
+  const st = b.style == 'image' && !b.custom ? 'classic' : b.style, n = Math.max(1, b.count);
+  for (let i = 0; i < n; i++) {
+    const sz = b.size * (1 - i * .12); let el;
+    if (st == 'image') { el = document.createElement('img'); el.src = b.custom; el.style.objectFit = 'contain'; } else { el = document.createElement('i'); el.className = 'bub ' + (st == 'classic' ? '' : st); }
+    Object.assign(el.style, { position: 'absolute', width: sz + 'px', height: sz + 'px', left: b.x + i * b.spread - sz / 2 + 'px', top: b.y - i * b.spread * .3 - sz / 2 + 'px',
+      animationName: b.end == 'deflate' ? 'bs' : 'bb', animationDuration: b.dur + 's', animationDelay: i * .35 + 's', animationTimingFunction: 'ease-in-out', animationFillMode: 'both' });
+    el.style.setProperty('--bc', b.col); el.style.setProperty('--bo', b.opacity / 100);
+    el.onanimationend = () => el.remove(); $('#fx').appendChild(el);
+  }
+}
+function frame(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now; const mc = S.mic, s = C();
+  let raw = 0; if (an) { an.getFloatTimeDomainData(buf); let q = 0; for (const v of buf) q += v * v; raw = Math.min(100, Math.sqrt(q / buf.length) * mc.gain * 100); }
+  lvl += (raw - lvl) * (raw > lvl ? .6 : .15);
+  if (!speaking && lvl < mc.open) floor += (lvl - floor) * (lvl < floor ? .2 : .004);
+  const eff = Math.max(0, lvl - floor * mc.nr / 100 * 1.5), close = mc.open * .7;
+  if (!mc.on) { speaking = false; above = below = 0; }
+  else { if (eff > mc.open) { above += dt; below = 0 } else { above = 0; below = eff < close ? below + dt : 0 }
+    if (!speaking && above >= mc.attack) speaking = true; if (speaking && below >= mc.release) { speaking = false; above = 0 } }
+  $('#b1 .fill').style.height = (mc.on ? eff : 0) + '%';
+  $('#b2 .fill').style.height = (speaking ? Math.max(0, 1 - below / Math.max(.001, mc.release)) * mc.release * 1000 / 15 : 0) + '%';
+  if (speaking != hot) { hot = speaking; $('#b1').classList.toggle('hot', hot); }
+  if (now > nextB) { blinkEnd = now + s.blink.dur * 1000; nextB = blinkEnd + (s.blink.min + Math.random() * Math.max(0, s.blink.max - s.blink.min)) * 1000; }
+  const key = !mc.on ? 'off' : (now < blinkEnd ? 'ec' : 'eo') + (speaking ? 'Mo' : 'Mc');
+  const src = key == 'off' ? (s.img.off || s.img.ecMc || s.img.eoMc || '') : (s.img[key] || s.img.eoMc || '');
+  if (src !== cur) { cur = src; $('#im').src = src; } $('#im').style.visibility = src ? 'visible' : 'hidden';
+  tt += dt * (mc.on ? 1 : s.sleep.breath);
+  const a = calc(s.mv.idle), b = calc(s.mv.talk); mix += ((speaking ? 1 : 0) - mix) * Math.min(1, dt * 10);
+  const f = i => a[i] + (b[i] - a[i]) * mix;
+  tiltV += ((mc.on ? 0 : s.sleep.tilt) - tiltV) * Math.min(1, dt * 3); dimV += ((mc.on ? 0 : s.sleep.dim) - dimV) * Math.min(1, dt * 3);
+  const av = $('#av'); av.style.transform = `translate(${f(0)}px,${f(1)}px) rotate(${tiltV}deg) scale(${f(2)},${f(3)})`; av.style.filter = `brightness(${1 - dimV / 100})`;
+  zt += dt; bt += dt;
+  if (!mc.on) { if (s.sleep.zzz.on && zt > s.sleep.zzz.freq) { zt = 0; spawnZ(s.sleep); } if (s.sleep.bubble.on && bt > s.sleep.bubble.freq) { bt = 0; spawnB(s.sleep.bubble); } } else { zt = s.sleep.zzz.freq; bt = s.sleep.bubble.freq; }
+  requestAnimationFrame(frame);
+}
+[['#fxh', 'zzz'], ['#fxb', 'bubble']].forEach(([id, k]) => { $(id).onmousedown = e => { const o = C().sleep[k], x0 = e.clientX - o.x, y0 = e.clientY - o.y;
+  const mv = ev => { o.x = ev.clientX - x0; o.y = ev.clientY - y0; apply(); }, up = () => { removeEventListener('mousemove', mv); removeEventListener('mouseup', up); renderChar(); save(); };
+  addEventListener('mousemove', mv); addEventListener('mouseup', up); }; });
+addEventListener('resize', apply);
+navigator.mediaDevices.addEventListener('devicechange', startMic);
+ipc.on('upd', (e, s) => { upd = s; const el = $('#updst'); if (el) el.textContent = updText(); });
+ipc.invoke('ver').then(v => { VER = v || ''; if (U.pop == 'gear') renderPops(); });
+render(); sendKeys(); startMic(); requestAnimationFrame(frame);
+setTimeout(() => { if (S.autoUpd) ipc.send('upd-check', false); }, 4000);
+</script></body></html>

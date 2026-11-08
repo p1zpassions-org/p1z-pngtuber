@@ -1,0 +1,43 @@
+{
+  "name": "p1z-pngtuber",
+  "version": "1.0.0",
+  "description": "P1zTube - PNGtuber",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "release": "electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.p1z.p1ztube",
+    "productName": "P1zTube",
+    "files": [
+      "main.js",
+      "index.html",
+      "build/icon.png"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "p1zpassions-org",
+        "repo": "p1z-pngtuber",
+        "releaseType": "release"
+      }
+    ],
+    "nsis": {
+      "shortcutName": "P1zTube"
+    }
+  },
+  "productName": "P1zTube"
+}
