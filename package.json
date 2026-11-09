@@ -1,6 +1,6 @@
 {
   "name": "p1z-pngtuber",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "P1zTube - PNGtuber",
   "main": "main.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "electron-updater": "^6.3.0"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
+    "electron": "^45.2.3",
     "electron-builder": "^24.13.3"
   },
   "build": {
@@ -39,5 +39,8 @@
       "shortcutName": "P1zTube"
     }
   },
-  "productName": "P1zTube"
+  "productName": "P1zTube",
+  "allowScripts": {
+    "electron@45.2.3": true
+  }
 }

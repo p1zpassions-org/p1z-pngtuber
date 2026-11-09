@@ -23,6 +23,8 @@ svg.s{width:16px;height:16px}
 @keyframes zd{0%{transform:translate(0,0);opacity:0}20%{opacity:var(--zo)}100%{transform:translate(var(--dx),calc(var(--rise)*-1)) scale(1.1);opacity:0}}
 @keyframes bb{0%{transform:scale(.1);opacity:0}15%{opacity:var(--bo)}55%{transform:scale(1)}70%{transform:scale(.88)}85%{transform:scale(1.04)}93%{transform:scale(1.12);opacity:var(--bo)}100%{transform:scale(1.3);opacity:0}}
 @keyframes bs{0%{transform:scale(.1);opacity:0}15%{opacity:var(--bo)}50%{transform:scale(1)}70%{transform:scale(1.05)}100%{transform:scale(.05);opacity:0}}
+@keyframes zn{0%{transform:translate(0,0) scale(.5) rotate(-8deg);opacity:0}15%{opacity:var(--zo)}40%{transform:translate(calc(var(--dx)*.5),calc(var(--rise)*-.4)) scale(.9) rotate(6deg)}70%{transform:translate(calc(var(--dx)*.2),calc(var(--rise)*-.75)) scale(1.1) rotate(-4deg);opacity:var(--zo)}100%{transform:translate(calc(var(--dx)*.6),calc(var(--rise)*-1)) scale(1.2) rotate(5deg);opacity:0}}
+@keyframes bn{0%{transform:scale(.1);opacity:0}10%{transform:scale(.35);opacity:var(--bo)}22%{transform:scale(.7)}34%{transform:scale(.5)}48%{transform:scale(.85)}60%{transform:scale(.62)}74%{transform:scale(1)}84%{transform:scale(.95)}93%{transform:scale(1.1);opacity:var(--bo)}100%{transform:scale(1.3);opacity:0}}
 .fxh{position:absolute;width:28px;height:28px;margin:-14px;border:2px dashed #fff;border-radius:50%;background:#0006;cursor:move;display:none;place-items:center;z-index:5;color:#fff;font-weight:800}
 .ui{transition:opacity .2s}
 body[data-f="0"] .ui,body[data-l="1"] .menu{opacity:0;pointer-events:none}
@@ -82,6 +84,12 @@ select,input[type=text]{width:100%;background:var(--card);color:var(--ink);borde
 #sets button.dragging{opacity:.4}
 #sets button.over{box-shadow:0 0 0 3px var(--acc)}
 #lk{position:absolute;right:14px;bottom:14px}
+#dlg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#1b2f5a55;backdrop-filter:blur(2px);z-index:50}
+#dlg.open{display:flex}
+.dlgb{width:300px;max-width:90%;padding:20px;text-align:center;animation:pp .18s ease-out}
+.dlgb p{margin:0 0 16px;font-size:14px;line-height:1.5}
+.dlgbt{display:flex;justify-content:center;gap:18px}
+.dlgbt .ib{width:52px;height:52px}
 #hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font-size:16px;text-shadow:0 1px 4px #0008;pointer-events:none}
 </style></head><body data-f="1" data-l="0" data-theme="blue">
 <svg width="0" height="0"><filter id="pst"><feComponentTransfer><feFuncR type="discrete"/><feFuncG type="discrete"/><feFuncB type="discrete"/></feComponentTransfer></filter></svg>
@@ -100,6 +108,7 @@ select,input[type=text]{width:100%;background:var(--card);color:var(--ink);borde
 <div id="cp" class="pop box ui menu"></div>
 <div id="sets" class="ui menu box"></div>
 <button id="lk" class="ib ui"></button>
+<div id="dlg"></div>
 <script>
 const { ipcRenderer: ipc } = require('electron');
 const $ = s => document.querySelector(s);
@@ -123,7 +132,10 @@ const IC = {
   refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',
   trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',
   copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
-  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>'
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
+  yes: '<circle cx="12" cy="12" r="7"/>',
+  no: '<path d="M6 6l12 12M18 6L6 18"/>',
+  sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>'
 };
 const svg = (n, c = '') => `<svg class="i ${c}" viewBox="0 0 24 24">${IC[n]}</svg>`;
 const sm = n => svg(n, 's');
@@ -134,17 +146,17 @@ const defMv = () => ({ talk: { bounce: m(1, 0, 14, .35, .1), wave: m(0, 10, 0, 1
                        idle: { bounce: m(0, 0, 6, .6, 1), wave: m(0, 8, 0, 2, 0), breathe: m(1, 0, 10, 3.5, .5) } });
 const defSleep = () => ({ tilt: 8, breath: .5, dim: 35,
   zzz: { on: 1, style: 'classic', text: 'Z', count: 3, size: 56, freq: 1.4, dur: 3, rise: 110, drift: 40, spread: 28, stagger: .45, opacity: 100, glow: 14, col: '#ffffff', outline: '#2b4a8a', x: 60, y: -60, custom: '' },
-  bubble: { on: 1, style: 'classic', end: 'pop', col: '#7cc4ff', count: 1, size: 48, freq: 3.5, dur: 3.2, opacity: 100, spread: 40, x: -40, y: -10, custom: '' } });
+  bubble: { on: 1, style: 'classic', motion: 'grow', end: 'pop', col: '#7cc4ff', count: 1, size: 48, freq: 3.5, dur: 3.2, opacity: 100, spread: 40, x: -40, y: -10, custom: '' } });
 const newId = () => Math.random().toString(36).slice(2);
 const newSet = n => ({ name: n, id: newId(), keys: [], img: {}, size: 90, style: 'smooth', px: 4, col: 6,
-  mv: defMv(), blink: { min: 2, max: 6, dur: .14 }, sleep: defSleep() });
+  mv: defMv(), blink: { min: 2, max: 6, dur: .14 }, sleep: defSleep(), adv: { peakOn: 1, peakLevel: 70, peakHold: 300 } });
 const def = () => ({ cur: 0, theme: 'blue', lang: 'th', bg: '#00FF00', autoUpd: 1, sets: [newSet('ตัวละคร 1')],
-  mic: { dev: '', nr: 50, hp: 100, gain: 4, open: 12, release: .25, attack: .03, on: 1 },
+  mic: { dev: '', nr: 50, focus: 40, hp: 100, gain: 4, open: 12, release: .25, attack: .03, on: 1 },
   keys: { switch: ['Ctrl+Alt+Right'], mute: ['Ctrl+M'], lock: ['Ctrl+Alt+L'] } });
 let S; try { S = JSON.parse(ipc.sendSync('load')) || def(); } catch { S = def(); }
 S = Object.assign(def(), S); S.mic = Object.assign(def().mic, S.mic); S.keys = Object.assign(def().keys, S.keys);
 S.mic.nr = S.mic.nr <= 1 ? (S.mic.nr ? 50 : 0) : S.mic.nr;
-S.sets.forEach(s => { s.id = s.id || newId(); s.keys = s.keys || []; delete s.bg;
+S.sets.forEach(s => { s.id = s.id || newId(); s.keys = s.keys || []; delete s.bg; s.adv = Object.assign(newSet('').adv, s.adv);
   if (!s.sleep || typeof s.sleep.zzz !== 'object') { const o = s.sleep || {}, n = defSleep();
     n.tilt = o.tilt ?? n.tilt; n.breath = o.breath ?? n.breath; n.dim = o.dim ?? n.dim; n.custom = o.custom || '';
     n.zzz.on = o.zzz ?? 1; n.bubble.on = o.bubble ?? 1; n.custom = o.custom || ''; s.sleep = n; }
@@ -152,6 +164,18 @@ S.sets.forEach(s => { s.id = s.id || newId(); s.keys = s.keys || []; delete s.bg
   if (s.sleep.custom) { s.sleep.zzz.custom = s.sleep.custom; s.sleep.zzz.style = 'image'; } delete s.sleep.custom; });
 if (S.cur >= S.sets.length) S.cur = 0;
 const t = (th, en) => S.lang == 'en' ? en : th;
+const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let dq = Promise.resolve();
+const askNow = (msg, info) => new Promise(res => {
+  const o = document.querySelector('#dlg');
+  o.innerHTML = `<div class="box dlgb"><p>${esc(msg)}</p><div class=dlgbt>${info ? '' : `<button class="ib" data-d=0 title="${t('ไม่', 'No')}">${svg('no')}</button>`}<button class="ib on" data-d=1 title="${t('ใช่', 'Yes')}">${svg('yes')}</button></div></div>`;
+  o.classList.add('open');
+  const done = v => { o.classList.remove('open'); o.innerHTML = ''; o.onclick = null; document.removeEventListener('keydown', kd, true); res(v); };
+  const kd = e => { if (e.key == 'Enter') { e.preventDefault(); e.stopPropagation(); done(true); } else if (e.key == 'Escape') { e.preventDefault(); e.stopPropagation(); done(false); } };
+  document.addEventListener('keydown', kd, true);
+  o.onclick = e => { const b = e.target.closest('[data-d]'); if (b) done(b.dataset.d == '1'); };
+});
+const ask = (msg, info) => { const p = dq.then(() => askNow(msg, info)); dq = p.catch(() => {}); return p; };
 const C = () => S.sets[S.cur];
 const U = { pop: '', ctab: 'img', open: !Object.values(C().img).some(Boolean) };
 let VER = '', upd = { state: '' }, lastLang;
@@ -175,7 +199,7 @@ const col = (l, p) => `<div class=row><span>${l}</span><span class=rg><input typ
 const sel = (l, p, o) => `<div class=rw><div class=rt><i>${l}</i>${rsb(p)}</div><select data-p="${p}">${o.map(([v, x]) => `<option value="${v}" ${gv(p) == v ? 'selected' : ''}>${x}</option>`).join('')}</select></div>`;
 const txt = (l, p) => `<div class=rw><div class=rt><i>${l}</i>${rsb(p)}</div><input type=text maxlength=6 data-p="${p}" value="${gv(p)}"></div>`;
 const slot = (l, k) => { const u = gv('C.' + k), n = k.split('.').pop();
-  const ph = u ? `<img src="${u}" alt="">` : `<span class=ph>${n == 'off' ? svg('micoff') : n == 'custom' ? svg('image') : face(n)}</span>`;
+  const ph = u ? `<img src="${u}" alt="">` : `<span class=ph>${n == 'off' ? svg('micoff') : n == 'custom' ? svg('image') : face(n == 'peak' ? 'eoMo' : n)}</span>`;
   return `<div class=slot>${ph}<b>${l}</b><button class=b data-pick="C.${k}">${t('เลือก', 'Choose')}</button>${u ? `<button class=b data-clear="C.${k}">${t('ลบ', 'Remove')}</button>` : ''}</div>`; };
 const keysFor = a => a == 'set' ? C().keys : S.keys[a];
 const allCombos = () => [...Object.values(S.keys).flat(), ...S.sets.flatMap(s => s.keys)];
@@ -183,7 +207,7 @@ const keyChips = a => keysFor(a).map((k, i) => `<span class=chip data-rm="${a}.$
 const KEYS3 = ['bounce', 'wave', 'breathe'];
 const MOTN = () => [['bounce', t('เด้ง', 'Bounce')], ['wave', t('Wave (ส่าย)', 'Wave')], ['breathe', t('หายใจ', 'Breathe')]];
 const rt = k => `<p><button class=b data-act=resettab data-k=${k}>${sm('refresh')}${t('รีเซ็ตแท็บนี้', 'Reset this tab')}</button></p>`;
-const ZS = () => [['classic', t('คลาสสิก (แบบเดิม)', 'Classic (original)')], ['wave', t('โบกส่าย', 'Wavy')], ['pop', t('ป๊อป', 'Pop')], ['drift', t('ลอยช้า', 'Slow drift')], ['image', t('ใช้ภาพของตัวเอง', 'Custom image')]];
+const ZS = () => [['classic', t('คลาสสิก (แบบเดิม)', 'Classic (original)')], ['wave', t('โบกส่าย', 'Wavy')], ['natural', t('ลอยนุ่มนวล', 'Soft natural')], ['pop', t('ป๊อป', 'Pop')], ['drift', t('ลอยช้า', 'Slow drift')], ['image', t('ใช้ภาพของตัวเอง', 'Custom image')]];
 const BS = () => [['classic', t('คลาสสิก (ฟ้าใส)', 'Classic (clear blue)')], ['soap', t('ฟองสบู่รุ้ง', 'Rainbow soap')], ['glossy', t('เงามัน', 'Glossy')], ['jelly', t('เจลลี่ขุ่น', 'Jelly')], ['image', t('ใช้ภาพของตัวเอง', 'Custom image')]];
 const P = {
   img: () => `<label>${t('ชื่อตัวละคร', 'Character name')}<input type=text data-p="C.name" value="${C().name}"></label>
@@ -201,17 +225,20 @@ const P = {
     ${rng(t('ระยะลอยขึ้น (px)', 'Rise distance (px)'), z + 'rise', 20, 400)}${rng(t('เอียงข้างขณะลอย (px)', 'Sideways drift (px)'), z + 'drift', -200, 200)}${rng(t('ระยะห่างระหว่างตัว (px)', 'Spacing (px)'), z + 'spread', 0, 120)}${rng(t('หน่วงระหว่างตัว (วิ)', 'Delay between letters (s)'), z + 'stagger', 0, 1.5, .05)}
     ${rng(t('ความทึบ (%)', 'Opacity (%)'), z + 'opacity', 10, 100)}${rng(t('เรืองแสง', 'Glow'), z + 'glow', 0, 40)}${col(t('สี Zzz', 'Zzz color'), z + 'col')}${col(t('สีขอบ/เรืองแสง', 'Outline / glow'), z + 'outline')}
     ${rng(t('ตำแหน่ง X', 'Position X'), z + 'x', -600, 600)}${rng(t('ตำแหน่ง Y', 'Position Y'), z + 'y', -400, 400)}${slot(t('ภาพของตัวเอง (PNG/GIF)', 'Custom image (PNG/GIF)'), 'sleep.zzz.custom')}
-    <h3>${t('ฟองน้ำมูก', 'Snot bubble')}</h3>${chk(t('เปิด', 'Enabled'), b + 'on')}${sel(t('รูปแบบ', 'Style'), b + 'style', BS())}${sel(t('ตอนจบ', 'Ending'), b + 'end', [['pop', t('แตก', 'Pop')], ['deflate', t('ค่อยๆ ยุบ', 'Deflate')]])}${col(t('สีฟอง', 'Bubble tint'), b + 'col')}
+    <h3>${t('ฟองน้ำมูก', 'Snot bubble')}</h3>${chk(t('เปิด', 'Enabled'), b + 'on')}${sel(t('รูปแบบ', 'Style'), b + 'style', BS())}${sel(t('การเคลื่อนไหว', 'Motion'), b + 'motion', [['grow', t('พองแล้วแตก/ยุบ', 'Grow, then pop/deflate')], ['breathe', t('พอง-ยุบตามลมหายใจ แล้วแตก', 'Breathing in/out, then pop')]])}${sel(t('ตอนจบ', 'Ending'), b + 'end', [['pop', t('แตก', 'Pop')], ['deflate', t('ค่อยๆ ยุบ', 'Deflate')]])}${col(t('สีฟอง', 'Bubble tint'), b + 'col')}
     ${rng(t('ความเยอะ (ฟองต่อรอบ)', 'Amount (per burst)'), b + 'count', 1, 5)}${rng(t('ขนาด', 'Size'), b + 'size', 12, 200)}${rng(t('ความถี่ (ทุกกี่วินาที)', 'Every (seconds)'), b + 'freq', .5, 8, .1)}${rng(t('ระยะเวลา (วิ)', 'Duration (s)'), b + 'dur', 1, 10, .1)}
     ${rng(t('ความทึบ (%)', 'Opacity (%)'), b + 'opacity', 10, 100)}${rng(t('ระยะห่างระหว่างฟอง (px)', 'Spacing (px)'), b + 'spread', 0, 150)}${rng(t('ตำแหน่ง X', 'Position X'), b + 'x', -600, 600)}${rng(t('ตำแหน่ง Y', 'Position Y'), b + 'y', -400, 400)}${slot(t('ภาพของตัวเอง (PNG/GIF)', 'Custom image (PNG/GIF)'), 'sleep.bubble.custom')}
     <h3>${t('อื่นๆ', 'Other')}</h3>${rng(t('เอียงหัว (องศา)', 'Head tilt (deg)'), 'C.sleep.tilt', 0, 30)}${rng(t('หายใจช้าลง (x ความเร็ว)', 'Breathing speed (x)'), 'C.sleep.breath', .1, 1.5, .05)}${rng(t('ภาพมืดลง (%)', 'Dim (%)'), 'C.sleep.dim', 0, 80)}${rt('sleep')}`; },
+  adv: () => `<p class=mt>${t('ภาพตอนเสียงพีค (ตะโกน): ใช้ภาพปากอ้าค้างที่ไม่ต้องขยับ เมื่อเสียงดังถึงระดับที่ตั้ง', 'Peak (shout) image: a held open-mouth image shown when the volume reaches the level below.')}</p>
+    ${slot(t('ภาพตอนเสียงพีค (อ้าปากค้าง)', 'Peak image (mouth held open)'), 'img.peak')}${chk(t('เปิดใช้', 'Enabled'), 'C.adv.peakOn')}${rng(t('ระดับเสียงที่ถือว่าพีค', 'Peak level'), 'C.adv.peakLevel', 20, 100)}${rng(t('ค้างต่ออีก (มิลลิวินาที)', 'Hold after peak (ms)'), 'C.adv.peakHold', 0, 1500, 50)}
+    <p class=mt>${t('ดูระดับเสียงจากหลอดด้านซ้ายประกอบ', 'Use the level bar on the left as a guide.')}</p>${rt('adv')}`,
   keys: () => `<p class=mt>${t('กดแล้วสลับมาตัวนี้ทันที เช่น Ctrl+1 ใช้ได้แม้อยู่ในเกม ใส่ได้หลายคอมโบ', 'Jump to this character instantly, e.g. Ctrl+1. Works in-game; multiple combos allowed.')}</p>${keyChips('set')}`
 };
-const CTABS = () => [['img', 'image', t('ภาพ', 'Images')], ['mv', 'move', t('มูฟเมนต์', 'Movement')], ['blink', 'eye', t('กะพริบตา', 'Blink')], ['disp', 'display', t('แสดงผล', 'Display')], ['sleep', 'moon', t('หลับ', 'Sleep')], ['keys', 'keyboard', t('คีย์ลัด', 'Hotkeys')]];
+const CTABS = () => [['img', 'image', t('ภาพ', 'Images')], ['mv', 'move', t('มูฟเมนต์', 'Movement')], ['blink', 'eye', t('กะพริบตา', 'Blink')], ['disp', 'display', t('แสดงผล', 'Display')], ['sleep', 'moon', t('หลับ', 'Sleep')], ['keys', 'keyboard', t('คีย์ลัด', 'Hotkeys')], ['adv', 'sliders', t('ขั้นสูง', 'Advanced')]];
 const BGS = [['#00FF00', 'Green'], ['#0000FF', 'Blue'], ['#FF00FF', 'Magenta']];
 const popMic = () => `<h2>${t('ตั้งค่าไมค์', 'Microphone')}</h2><button class="b ${S.mic.on ? 'on' : ''}" data-mic style="width:100%;justify-content:center">${sm(S.mic.on ? 'mic' : 'micoff')}${S.mic.on ? t('ไมค์เปิดอยู่ (กดเพื่อปิด)', 'Mic is ON (click to turn off)') : t('ไมค์ปิดอยู่ (กดเพื่อเปิด)', 'Mic is OFF (click to turn on)')}</button>
   ${sel(t('อุปกรณ์ไมค์', 'Input device'), 'S.mic.dev', [['', t('ค่าเริ่มต้น', 'Default')], ...devs.map(d => [d.deviceId, d.label || 'Mic'])])}
-  ${rng(t('ลดเสียงรบกวน (%)', 'Noise reduction (%)'), 'S.mic.nr', 0, 100)}${rng(t('ตัดเสียงต่ำ (Hz)', 'Low cut (Hz)'), 'S.mic.hp', 0, 400, 10)}${rng(t('ความแรงสัญญาณ (gain)', 'Input gain'), 'S.mic.gain', 1, 20, .5)}${rng(t('เวลาตอบสนองตอนเริ่มพูด (วิ)', 'Attack time (s)'), 'S.mic.attack', 0, .5, .01)}
+  ${rng(t('ลดเสียงรบกวน (%)', 'Noise reduction (%)'), 'S.mic.nr', 0, 100)}${rng(t('โฟกัสเสียงพูด (%) ตัดเสียงที่ไม่ใช่เสียงพูด', 'Voice focus (%) ignores non-speech sounds'), 'S.mic.focus', 0, 100)}${rng(t('ตัดเสียงต่ำ (Hz)', 'Low cut (Hz)'), 'S.mic.hp', 0, 400, 10)}${rng(t('ความแรงสัญญาณ (gain)', 'Input gain'), 'S.mic.gain', 1, 20, .5)}${rng(t('เวลาตอบสนองตอนเริ่มพูด (วิ)', 'Attack time (s)'), 'S.mic.attack', 0, .5, .01)}
   <p class=mt>${t('ระดับดูดเสียงและเวลาหน่วง ปรับได้ด้วยการลากหัวใจบนหลอดเสียงด้านซ้าย (ดับเบิลคลิกที่หลอดเพื่อคืนค่าเริ่มต้น)', 'Gate level and delay: drag the hearts on the bars at the left (double-click a bar to reset it).')}</p>
   <button class=b data-act=resetmic>${sm('refresh')}${t('คืนค่าเริ่มต้นไมค์ทั้งหมด', 'Reset all mic settings')}</button>`;
 const popGear = () => `<h2>${t('ตั้งค่าทั่วไป', 'General settings')}</h2>
@@ -288,7 +315,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('click', async e => {
   const tg = e.target, el = tg.closest('[data-pop],[data-mic],[data-set],[data-newset],[data-pick],[data-clear],[data-mode],[data-act],[data-rm],[data-add],[data-ctab],[data-close],[data-tg],[data-bg],[data-rs],[data-rk],[data-acc]');
-  if (!el) { if (!tg.closest('.pop') && U.pop) { U.pop = ''; renderPops(); } return; }
+  if (!el) { if (!tg.closest('.pop') && !tg.closest('#dlg') && U.pop) { U.pop = ''; renderPops(); } return; }
   const d = el.dataset;
   if (d.pop) { U.pop = U.pop == d.pop ? '' : d.pop; renderPops(); }
   else if (d.tg) { const v = +!gv(d.tg); sv(d.tg, v); el.classList.toggle('on', !!v); el.setAttribute('aria-checked', !!v); if (/\.sleep\./.test(d.tg)) renderChar(); apply(); save(); }
@@ -306,12 +333,14 @@ document.addEventListener('click', async e => {
   else if (d.clear) { sv(d.clear, ''); const sp = d.clear.replace('custom', 'style'); if (/sleep\.(zzz|bubble)\.style$/.test(sp) && gv(sp) == 'image') sv(sp, 'classic'); render(); save(); }
   else if (d.mode) { mvMode = d.mode; renderChar(); }
   else if (d.act == 'updcheck') { upd = { state: 'checking' }; const el = $('#updst'); if (el) el.textContent = updText(); ipc.send('upd-check', true); }
-  else if (d.act == 'resetmic') { const on = S.mic.on; S.mic = structuredClone(DEF.mic); S.mic.on = on; startMic(); render(); save(); }
-  else if (d.act == 'resettab') { const c = C(), k = d.k; if (k == 'blink') c.blink = structuredClone(DSET.blink); if (k == 'disp') { c.size = DSET.size; c.style = DSET.style; c.px = DSET.px; c.col = DSET.col; } if (k == 'sleep') c.sleep = structuredClone(DSET.sleep); render(); save(); }
-  else if (d.act == 'resetmv') { C().mv[mvMode] = defMv()[mvMode]; renderChar(); save(); }
-  else if (d.act == 'resetall') { if (confirm(t('รีเซ็ตมูฟเมนต์ทั้งหมดของตัวละครนี้?', 'Reset all movement of this character?'))) { C().mv = defMv(); renderChar(); save(); } }
+  else if (d.act == 'resetmic') { if (await ask(t('คืนค่าเริ่มต้นไมค์ทั้งหมด?', 'Reset all mic settings?'))) { const on = S.mic.on; S.mic = structuredClone(DEF.mic); S.mic.on = on; startMic(); render(); save(); } }
+  else if (d.act == 'resettab') { const k = d.k; if (await ask(k == 'sleep' ? t('รีเซ็ตเอฟเฟกต์หลับทั้งหมด (รวมภาพที่ใส่เอง)?', 'Reset all sleep effects (including your custom images)?') : t('รีเซ็ตแท็บนี้เป็นค่าเริ่มต้น?', 'Reset this tab to defaults?'))) {
+      const c = C(); if (k == 'blink') c.blink = structuredClone(DSET.blink); if (k == 'disp') { c.size = DSET.size; c.style = DSET.style; c.px = DSET.px; c.col = DSET.col; }
+      if (k == 'sleep') c.sleep = structuredClone(DSET.sleep); if (k == 'adv') c.adv = structuredClone(DSET.adv); render(); save(); } }
+  else if (d.act == 'resetmv') { if (await ask(t('รีเซ็ตมูฟเมนต์โหมดนี้เป็นค่าเริ่มต้น?', 'Reset this movement mode to defaults?'))) { C().mv[mvMode] = defMv()[mvMode]; renderChar(); save(); } }
+  else if (d.act == 'resetall') { if (await ask(t('รีเซ็ตมูฟเมนต์ทั้งหมดของตัวละครนี้?', 'Reset all movement of this character?'))) { C().mv = defMv(); renderChar(); save(); } }
   else if (d.act == 'dup') { const c = structuredClone(C()); c.name += ' copy'; c.id = newId(); c.keys = []; S.sets.push(c); S.cur = S.sets.length - 1; render(); save(); }
-  else if (d.act == 'del') { if (S.sets.length < 2) alert(t('ต้องเหลืออย่างน้อย 1 ตัวละคร', 'At least one character is required')); else if (confirm(t('ลบตัวละคร "', 'Delete character "') + C().name + '" ?')) { S.sets.splice(S.cur, 1); S.cur = Math.max(0, S.cur - 1); sendKeys(); render(); save(); } }
+  else if (d.act == 'del') { if (S.sets.length < 2) ask(t('ต้องเหลืออย่างน้อย 1 ตัวละคร', 'At least one character is required'), true); else if (await ask(t('ลบตัวละคร "', 'Delete character "') + C().name + '" ?')) { S.sets.splice(S.cur, 1); S.cur = Math.max(0, S.cur - 1); sendKeys(); render(); save(); } }
   else if (d.rm) { const [a, i] = d.rm.split('.'); keysFor(a).splice(+i, 1); sendKeys(); render(); save(); }
   else if (d.add) { cap = d.add; render(); }
 });
@@ -329,7 +358,7 @@ document.addEventListener('keydown', e => {
   const map = { ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right', ' ': 'Space' };
   const k = map[e.key] || (e.key.length == 1 ? e.key.toUpperCase() : e.key);
   const a = [e.ctrlKey && 'Ctrl', e.altKey && 'Alt', e.shiftKey && 'Shift', e.metaKey && 'Super', k].filter(Boolean).join('+');
-  if (allCombos().includes(a)) alert(a + t(' ถูกใช้แล้ว', ' is already in use')); else keysFor(cap).push(a);
+  if (allCombos().includes(a)) ask(a + t(' ถูกใช้แล้ว', ' is already in use'), true); else keysFor(cap).push(a);
   cap = null; sendKeys(); render(); save();
 }, true);
 const sendKeys = () => { const mp = { ...S.keys }; S.sets.forEach(s => mp['set:' + s.id] = s.keys); ipc.send('hotkeys', mp); };
@@ -341,7 +370,7 @@ ipc.on('hotkey', (e, a) => {
 });
 ipc.on('focus', (e, f) => document.body.dataset.f = f ? 1 : 0);
 const toggleMic = () => { S.mic.on = S.mic.on ? 0 : 1; render(); save(); };
-let ac, an, hp, buf = new Float32Array(1024), stream;
+let ac, an, anF, lp, hp, buf = new Float32Array(1024), fbuf = new Float32Array(512), fb0 = 3, fb1 = 80, stream;
 async function startMic() {
   try {
     if (stream) stream.getTracks().forEach(x => x.stop()); if (ac) ac.close();
@@ -350,7 +379,10 @@ async function startMic() {
     ac = new AudioContext(); if (ac.state == 'suspended') ac.resume();
     const src = ac.createMediaStreamSource(stream);
     hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = S.mic.hp;
-    an = ac.createAnalyser(); an.fftSize = 1024; src.connect(hp); hp.connect(an);
+    lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4000;
+    an = ac.createAnalyser(); an.fftSize = 1024; anF = ac.createAnalyser(); anF.fftSize = 1024; anF.smoothingTimeConstant = .4;
+    fbuf = new Float32Array(anF.frequencyBinCount); const bw = ac.sampleRate / 1024; fb0 = Math.ceil(120 / bw); fb1 = Math.floor(4000 / bw);
+    src.connect(hp); hp.connect(lp); lp.connect(an); hp.connect(anF);
     const h = $('#hint'); delete h.dataset.err; apply();
     devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind == 'audioinput'); if (U.pop == 'mic') renderPops();
   } catch (err) { const h = $('#hint'); h.dataset.err = 1; h.textContent = t('เปิดไมค์ไม่ได้: ', 'Cannot open mic: ') + err.message; h.style.display = 'flex'; }
@@ -359,16 +391,18 @@ const mot = (q, tm, k) => { const c = q.per + q.pause; if (!q.on || q.per <= 0) 
   return k == 'bounce' ? -Math.sin(Math.PI * ph) : k == 'wave' ? Math.sin(2 * Math.PI * ph) : (1 - Math.cos(2 * Math.PI * ph)) / 2; };
 const calc = mv => { let x = 0, y = 0, sx = 1, sy = 1; for (const k of KEYS3) { const q = mv[k], v = mot(q, tt, k);
   if (k == 'breathe') { sx += q.ax * v / 400; sy += q.ay * v / 400 } else { x += q.ax * v; y += q.ay * v } } return [x, y, sx, sy]; };
-let last = performance.now(), tt = 0, mix = 0, zt = 0, bt = 0, lvl = 0, floor = 0, speaking = false, above = 0, below = 0, blinkEnd = 0, nextB = 0, tiltV = 0, dimV = 0, cur = '', hot = false;
+let prevOn = S.mic.on, fxClearing = false, vscore = 0, peakUntil = 0, last = performance.now(), tt = 0, mix = 0, zt = 0, bt = 0, lvl = 0, floor = 0, speaking = false, above = 0, below = 0, blinkEnd = 0, nextB = 0, tiltV = 0, dimV = 0, cur = '', hot = false;
+function clearFx() { const f = $('#fx'); if (!f.children.length || fxClearing) return; fxClearing = true; f.style.transition = 'opacity .12s'; f.style.opacity = '0';
+  setTimeout(() => { f.innerHTML = ''; f.style.opacity = '1'; f.style.transition = ''; fxClearing = false; }, 140); }
 function spawnZ(sl) {
   const z = sl.zzz, f = $('#fx'), st = z.style == 'image' && !z.custom ? 'classic' : z.style, n = Math.max(1, z.count);
-  const an_ = { classic: 'zf', wave: 'zw', pop: 'zp', drift: 'zd', image: 'zf' }[st] || 'zf';
+  const an_ = { classic: 'zf', wave: 'zw', natural: 'zn', pop: 'zp', drift: 'zd', image: 'zf' }[st] || 'zf';
   for (let i = 0; i < n; i++) {
-    const k = (st == 'classic' || st == 'wave') ? (n == 1 ? 1 : .65 + .55 * i / (n - 1)) : 1, fs = z.size * k; let el;
+    const k = (st == 'classic' || st == 'wave' || st == 'natural') ? (n == 1 ? 1 : .65 + .55 * i / (n - 1)) : 1, fs = z.size * k; let el;
     if (st == 'image') { el = document.createElement('img'); el.src = z.custom; Object.assign(el.style, { width: z.size + 'px', marginLeft: -z.size / 2 + 'px', marginTop: -z.size / 2 + 'px' }); }
     else { el = document.createElement('span'); el.textContent = z.text || 'Z'; const o = z.outline;
       Object.assign(el.style, { fontSize: fs + 'px', color: z.col, webkitTextStroke: Math.max(3, fs / 9) + 'px ' + o, paintOrder: 'stroke fill', textShadow: `0 0 ${z.glow}px ${o},0 0 4px ${o}` }); }
-    Object.assign(el.style, { left: z.x + i * z.spread + 'px', top: z.y - i * z.spread * .8 + 'px', animationName: an_, animationDuration: z.dur + 's', animationDelay: i * z.stagger + 's' });
+    Object.assign(el.style, { left: z.x + i * z.spread + 'px', top: z.y - i * z.spread * .8 + 'px', animationName: an_, animationTimingFunction: st == 'natural' ? 'ease-in-out' : 'ease-out', animationDuration: z.dur + 's', animationDelay: i * z.stagger + 's' });
     el.style.setProperty('--rise', z.rise + 'px'); el.style.setProperty('--dx', z.drift + 'px'); el.style.setProperty('--zo', z.opacity / 100);
     el.onanimationend = () => el.remove(); f.appendChild(el);
   }
@@ -379,17 +413,22 @@ function spawnB(b) {
     const sz = b.size * (1 - i * .12); let el;
     if (st == 'image') { el = document.createElement('img'); el.src = b.custom; el.style.objectFit = 'contain'; } else { el = document.createElement('i'); el.className = 'bub ' + (st == 'classic' ? '' : st); }
     Object.assign(el.style, { position: 'absolute', width: sz + 'px', height: sz + 'px', left: b.x + i * b.spread - sz / 2 + 'px', top: b.y - i * b.spread * .3 - sz / 2 + 'px',
-      animationName: b.end == 'deflate' ? 'bs' : 'bb', animationDuration: b.dur + 's', animationDelay: i * .35 + 's', animationTimingFunction: 'ease-in-out', animationFillMode: 'both' });
+      animationName: b.motion == 'breathe' ? 'bn' : (b.end == 'deflate' ? 'bs' : 'bb'), animationDuration: b.dur + 's', animationDelay: i * .35 + 's', animationTimingFunction: 'ease-in-out', animationFillMode: 'both' });
     el.style.setProperty('--bc', b.col); el.style.setProperty('--bo', b.opacity / 100);
     el.onanimationend = () => el.remove(); $('#fx').appendChild(el);
   }
 }
 function frame(now) {
   const dt = Math.min(.1, (now - last) / 1000); last = now; const mc = S.mic, s = C();
+  if (mc.on && !prevOn) clearFx(); prevOn = mc.on;
   let raw = 0; if (an) { an.getFloatTimeDomainData(buf); let q = 0; for (const v of buf) q += v * v; raw = Math.min(100, Math.sqrt(q / buf.length) * mc.gain * 100); }
   lvl += (raw - lvl) * (raw > lvl ? .6 : .15);
   if (!speaking && lvl < mc.open) floor += (lvl - floor) * (lvl < floor ? .2 : .004);
-  const eff = Math.max(0, lvl - floor * mc.nr / 100 * 1.5), close = mc.open * .7;
+  let r = 1; if (anF && mc.focus > 0) { anF.getFloatFrequencyData(fbuf); let tot = 0, sp = 0;
+    for (let i = 0; i < fbuf.length; i++) { const p = isFinite(fbuf[i]) ? Math.pow(10, fbuf[i] / 10) : 0; tot += p; if (i >= fb0 && i <= fb1) sp += p; } r = tot > 0 ? sp / tot : 0; }
+  vscore += (r - vscore) * (r > vscore ? .6 : .15);
+  const thr = Math.max(.001, mc.focus * .007), vf = mc.focus > 0 ? Math.min(1, vscore / thr) ** 2 : 1;
+  const eff = Math.max(0, lvl - floor * mc.nr / 100 * 1.5) * vf, close = mc.open * .7;
   if (!mc.on) { speaking = false; above = below = 0; }
   else { if (eff > mc.open) { above += dt; below = 0 } else { above = 0; below = eff < close ? below + dt : 0 }
     if (!speaking && above >= mc.attack) speaking = true; if (speaking && below >= mc.release) { speaking = false; above = 0 } }
@@ -397,8 +436,10 @@ function frame(now) {
   $('#b2 .fill').style.height = (speaking ? Math.max(0, 1 - below / Math.max(.001, mc.release)) * mc.release * 1000 / 15 : 0) + '%';
   if (speaking != hot) { hot = speaking; $('#b1').classList.toggle('hot', hot); }
   if (now > nextB) { blinkEnd = now + s.blink.dur * 1000; nextB = blinkEnd + (s.blink.min + Math.random() * Math.max(0, s.blink.max - s.blink.min)) * 1000; }
-  const key = !mc.on ? 'off' : (now < blinkEnd ? 'ec' : 'eo') + (speaking ? 'Mo' : 'Mc');
-  const src = key == 'off' ? (s.img.off || s.img.ecMc || s.img.eoMc || '') : (s.img[key] || s.img.eoMc || '');
+  if (mc.on && speaking && s.adv.peakOn && s.img.peak && eff >= s.adv.peakLevel) peakUntil = now + s.adv.peakHold;
+  const peak = mc.on && s.adv.peakOn && s.img.peak && now < peakUntil;
+  const key = !mc.on ? 'off' : peak ? 'peak' : (now < blinkEnd ? 'ec' : 'eo') + (speaking ? 'Mo' : 'Mc');
+  const src = key == 'off' ? (s.img.off || s.img.ecMc || s.img.eoMc || '') : key == 'peak' ? s.img.peak : (s.img[key] || s.img.eoMc || '');
   if (src !== cur) { cur = src; $('#im').src = src; } $('#im').style.visibility = src ? 'visible' : 'hidden';
   tt += dt * (mc.on ? 1 : s.sleep.breath);
   const a = calc(s.mv.idle), b = calc(s.mv.talk); mix += ((speaking ? 1 : 0) - mix) * Math.min(1, dt * 10);
@@ -406,7 +447,7 @@ function frame(now) {
   tiltV += ((mc.on ? 0 : s.sleep.tilt) - tiltV) * Math.min(1, dt * 3); dimV += ((mc.on ? 0 : s.sleep.dim) - dimV) * Math.min(1, dt * 3);
   const av = $('#av'); av.style.transform = `translate(${f(0)}px,${f(1)}px) rotate(${tiltV}deg) scale(${f(2)},${f(3)})`; av.style.filter = `brightness(${1 - dimV / 100})`;
   zt += dt; bt += dt;
-  if (!mc.on) { if (s.sleep.zzz.on && zt > s.sleep.zzz.freq) { zt = 0; spawnZ(s.sleep); } if (s.sleep.bubble.on && bt > s.sleep.bubble.freq) { bt = 0; spawnB(s.sleep.bubble); } } else { zt = s.sleep.zzz.freq; bt = s.sleep.bubble.freq; }
+  if (!mc.on && !fxClearing) { if (s.sleep.zzz.on && zt > s.sleep.zzz.freq) { zt = 0; spawnZ(s.sleep); } if (s.sleep.bubble.on && bt > s.sleep.bubble.freq) { bt = 0; spawnB(s.sleep.bubble); } } else { zt = s.sleep.zzz.freq; bt = s.sleep.bubble.freq; }
   requestAnimationFrame(frame);
 }
 [['#fxh', 'zzz'], ['#fxb', 'bubble']].forEach(([id, k]) => { $(id).onmousedown = e => { const o = C().sleep[k], x0 = e.clientX - o.x, y0 = e.clientY - o.y;
@@ -414,7 +455,9 @@ function frame(now) {
   addEventListener('mousemove', mv); addEventListener('mouseup', up); }; });
 addEventListener('resize', apply);
 navigator.mediaDevices.addEventListener('devicechange', startMic);
-ipc.on('upd', (e, s) => { upd = s; const el = $('#updst'); if (el) el.textContent = updText(); });
+ipc.on('upd', (e, s) => { upd = s; const el = $('#updst'); if (el) el.textContent = updText();
+  if (s.ask === 'download') ask(t('พบเวอร์ชันใหม่ ', 'New version ') + s.version + t(` (ปัจจุบัน ${s.current}) ต้องการอัปเดตหรือไม่?`, ` (you are on ${s.current}). Update now?`)).then(ok => ipc.send('upd-answer', 'download', ok));
+  if (s.ask === 'install') ask(t('โหลดอัปเดตเสร็จแล้ว รีสตาร์ทเพื่อติดตั้งตอนนี้เลยไหม? (ถ้าไม่ จะติดตั้งตอนปิดโปรแกรม)', 'Update downloaded. Restart and install now? (If not, it installs when you quit.)')).then(ok => ipc.send('upd-answer', 'install', ok)); });
 ipc.invoke('ver').then(v => { VER = v || ''; if (U.pop == 'gear') renderPops(); });
 render(); sendKeys(); startMic(); requestAnimationFrame(frame);
 setTimeout(() => { if (S.autoUpd) ipc.send('upd-check', false); }, 4000);

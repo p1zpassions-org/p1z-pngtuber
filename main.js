@@ -48,31 +48,22 @@ ipcMain.on('hotkeys', (e, map) => {
 });
 
 /* ---------- auto update (GitHub Releases) ---------- */
+const flash = () => { if (win && !win.isDestroyed()) win.flashFrame(true); };
 if (autoUpdater) {
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on('checking-for-update', () => send({ state: 'checking' }));
   autoUpdater.on('update-not-available', () => send({ state: 'none' }));
-  autoUpdater.on('update-available', async info => {
-    send({ state: 'available', version: info.version });
-    const r = await dialog.showMessageBox(win, { type: 'info', title: 'P1zTube',
-      message: tr(`พบเวอร์ชันใหม่ ${info.version}`, `New version ${info.version} is available`),
-      detail: tr(`เวอร์ชันปัจจุบัน ${app.getVersion()} ต้องการอัปเดตหรือไม่?`, `You are on ${app.getVersion()}. Do you want to update?`),
-      buttons: [tr('อัปเดตเลย', 'Update now'), tr('ไว้ทีหลัง', 'Later')], defaultId: 0, cancelId: 1, noLink: true });
-    if (r.response === 0) { send({ state: 'downloading', percent: 0 }); autoUpdater.downloadUpdate().catch(() => {}); }
-  });
+  autoUpdater.on('update-available', info => { send({ state: 'available', version: info.version, current: app.getVersion(), ask: 'download' }); flash(); });
   autoUpdater.on('download-progress', p => { send({ state: 'downloading', percent: Math.round(p.percent) }); if (win && !win.isDestroyed()) win.setProgressBar(p.percent / 100); });
-  autoUpdater.on('update-downloaded', async info => {
-    if (win && !win.isDestroyed()) win.setProgressBar(-1);
-    send({ state: 'ready', version: info.version });
-    const r = await dialog.showMessageBox(win, { type: 'question', title: 'P1zTube',
-      message: tr('โหลดอัปเดตเสร็จแล้ว', 'The update has been downloaded'),
-      detail: tr('รีสตาร์ทตอนนี้เพื่อติดตั้งเลยไหม? (ถ้าเลือกไว้ทีหลัง จะติดตั้งตอนปิดโปรแกรม)', 'Restart now to install? (If you choose Later, it installs when you quit.)'),
-      buttons: [tr('รีสตาร์ทเพื่อติดตั้ง', 'Restart and install'), tr('ไว้ทีหลัง', 'Later')], defaultId: 0, cancelId: 1, noLink: true });
-    if (r.response === 0) autoUpdater.quitAndInstall();
-  });
+  autoUpdater.on('update-downloaded', info => { if (win && !win.isDestroyed()) win.setProgressBar(-1); send({ state: 'ready', version: info.version, ask: 'install' }); flash(); });
   autoUpdater.on('error', e => { if (win && !win.isDestroyed()) win.setProgressBar(-1); send({ state: 'error', message: String((e && e.message) || e).slice(0, 160) }); });
 }
+ipcMain.on('upd-answer', (e, kind, ok) => {
+  if (!autoUpdater || !ok) return;
+  if (kind === 'download') { send({ state: 'downloading', percent: 0 }); autoUpdater.downloadUpdate().catch(() => {}); }
+  else if (kind === 'install') autoUpdater.quitAndInstall();
+});
 ipcMain.on('upd-check', (e, manual) => {
   if (!autoUpdater || !app.isPackaged) { if (manual) send({ state: 'dev' }); return; }
   autoUpdater.checkForUpdates().catch(() => {});
